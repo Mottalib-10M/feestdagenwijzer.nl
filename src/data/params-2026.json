@@ -1,0 +1,81 @@
+{
+  "_lisezmoi": "Tous les paramètres du site vivent ici, jamais en dur dans le code (MASTERFACTORY §4). Chaque date a été relue par curl sur la page officielle citée le jour de retrieved_at. Les textes de rijksoverheid.nl sont sous CC0 1.0 (rijksoverheid.nl/copyright) ; la Rijksoverheid n'approuve pas pour autant ce site.",
+  "year": 2026,
+  "retrieved_at": "2026-11-13",
+  "valid_from": "2026-01-01",
+  "valid_to": "2030-12-31",
+  "licentie": "CC0 1.0 — Rijksoverheid (teksten), rijksoverheid.nl/copyright, gelezen op 2026-11-13",
+  "sources": {
+    "rijks-feestdagen": { "url": "https://www.rijksoverheid.nl/onderwerpen/arbeidsovereenkomst-en-cao/vraag-en-antwoord/officiele-feestdagen", "label": { "nl": "Rijksoverheid — Wanneer zijn de officiële feestdagen in Nederland? (lijst 2026 en 2027)", "en": "Rijksoverheid (Dutch central government) — Official public holidays in the Netherlands, list for 2026 and 2027" } },
+    "gov-feestdagen-en": { "url": "https://www.government.nl/faq/work/public-holidays-in-the-netherlands", "label": { "nl": "Government.nl — Public holidays in the Netherlands (Engelse versie van de lijst)", "en": "Government.nl — Public holidays in the Netherlands (English version of the list)" } },
+    "rijks-goede-vrijdag": { "url": "https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/arbeidsovereenkomst-en-cao/goede-vrijdag-vrije-dag", "label": { "nl": "Rijksoverheid — Is Goede Vrijdag een vrije dag?", "en": "Rijksoverheid — Is Good Friday a day off? (Dutch)" } },
+    "rijks-tweede-paasdag": { "url": "https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/arbeidsovereenkomst-en-cao/is-tweede-paasdag-een-vrije-dag", "label": { "nl": "Rijksoverheid — Is Tweede Paasdag een vrije dag?", "en": "Rijksoverheid — Is Easter Monday a day off? (Dutch)" } },
+    "rijks-koningsdag": { "url": "https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/arbeidsovereenkomst-en-cao/koningsdag-27-april-vrije-dag", "label": { "nl": "Rijksoverheid — Is Koningsdag (27 april) een vrije dag?", "en": "Rijksoverheid — Is King's Day (27 April) a day off? (Dutch)" } },
+    "rijks-bevrijdingsdag": { "url": "https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/arbeidsovereenkomst-en-cao/bevrijdingsdag-5-mei-vrije-dag", "label": { "nl": "Rijksoverheid — Is Bevrijdingsdag (5 mei) een vrije dag?", "en": "Rijksoverheid — Is Liberation Day (5 May) a day off? (Dutch)" } },
+    "rijks-hemelvaart": { "url": "https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/arbeidsovereenkomst-en-cao/hemelvaartsdag-vrije-dag", "label": { "nl": "Rijksoverheid — Is Hemelvaartsdag een vrije dag?", "en": "Rijksoverheid — Is Ascension Day a day off? (Dutch)" } },
+    "rijks-tweede-pinksterdag": { "url": "https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/arbeidsovereenkomst-en-cao/is-tweede-pinksterdag-een-vrije-dag", "label": { "nl": "Rijksoverheid — Is Tweede Pinksterdag een vrije dag?", "en": "Rijksoverheid — Is Whit Monday a day off? (Dutch)" } },
+    "rijks-cao": { "url": "https://www.rijksoverheid.nl/onderwerpen/arbeidsovereenkomst-en-cao/vraag-en-antwoord/wat-is-een-cao", "label": { "nl": "Rijksoverheid — Wat is een cao?", "en": "Rijksoverheid — What is a collective labour agreement (cao)? (Dutch)" } },
+    "termijnenwet": { "url": "https://wetten.overheid.nl/BWBR0002448/2010-10-10", "label": { "nl": "Algemene termijnenwet, artikelen 1 tot 3 (wetten.overheid.nl)", "en": "Algemene termijnenwet (General Time Limits Act), sections 1 to 3 (wetten.overheid.nl, Dutch)" } },
+    "rijks-sv-2026": { "url": "https://www.rijksoverheid.nl/onderwerpen/schoolvakanties/overzicht-schoolvakanties-per-schooljaar/overzicht-schoolvakanties-2026-2027", "label": { "nl": "Rijksoverheid — Overzicht schoolvakanties 2026-2027", "en": "Rijksoverheid — School holidays 2026-2027 by region" } },
+    "rijks-sv-2027": { "url": "https://www.rijksoverheid.nl/onderwerpen/schoolvakanties/overzicht-schoolvakanties-per-schooljaar/overzicht-schoolvakanties-2027-2028", "label": { "nl": "Rijksoverheid — Overzicht schoolvakanties 2027-2028", "en": "Rijksoverheid — School holidays 2027-2028 by region" } },
+    "rijks-sv-2028": { "url": "https://www.rijksoverheid.nl/onderwerpen/schoolvakanties/overzicht-schoolvakanties-per-schooljaar/overzicht-schoolvakanties-2028-2029", "label": { "nl": "Rijksoverheid — Overzicht schoolvakanties 2028-2029", "en": "Rijksoverheid — School holidays 2028-2029 by region" } },
+    "rijks-sv-2029": { "url": "https://www.rijksoverheid.nl/onderwerpen/schoolvakanties/overzicht-schoolvakanties-per-schooljaar/overzicht-schoolvakanties-2029-2030", "label": { "nl": "Rijksoverheid — Overzicht schoolvakanties 2029-2030", "en": "Rijksoverheid — School holidays 2029-2030 by region" } },
+    "rijks-regios": { "url": "https://www.rijksoverheid.nl/onderwerpen/schoolvakanties/regios-schoolvakantie", "label": { "nl": "Rijksoverheid — Regio-indeling schoolvakanties (provincies en gemeenten)", "en": "Rijksoverheid — School-holiday regions (provinces and municipalities)" } },
+    "rijks-copyright": { "url": "https://www.rijksoverheid.nl/copyright", "label": { "nl": "Rijksoverheid — Copyright: Creative Commons zero-verklaring (CC0 1.0)", "en": "Rijksoverheid — Copyright notice: Creative Commons Zero (CC0 1.0)" } }
+  },
+  "schoolvakanties": {
+    "2026": {
+      "bron": "rijks-sv-2026",
+      "herfst": { "noord": ["2026-10-10", "2026-10-18"], "midden": ["2026-10-17", "2026-10-25"], "zuid": ["2026-10-17", "2026-10-25"] },
+      "kerst": { "noord": ["2026-12-19", "2027-01-03"], "midden": ["2026-12-19", "2027-01-03"], "zuid": ["2026-12-19", "2027-01-03"] },
+      "voorjaar": { "noord": ["2027-02-20", "2027-02-28"], "midden": ["2027-02-20", "2027-02-28"], "zuid": ["2027-02-13", "2027-02-21"] },
+      "mei": { "noord": ["2027-04-24", "2027-05-02"], "midden": ["2027-04-24", "2027-05-02"], "zuid": ["2027-04-24", "2027-05-02"] },
+      "zomer": { "noord": ["2027-07-10", "2027-08-22"], "midden": ["2027-07-17", "2027-08-29"], "zuid": ["2027-07-24", "2027-09-05"] },
+      "adviesMei": ["2027-05-01", "2027-05-09"]
+    },
+    "2027": {
+      "bron": "rijks-sv-2027",
+      "herfst": { "noord": ["2027-10-16", "2027-10-24"], "midden": ["2027-10-16", "2027-10-24"], "zuid": ["2027-10-23", "2027-10-31"] },
+      "kerst": { "noord": ["2027-12-25", "2028-01-09"], "midden": ["2027-12-25", "2028-01-09"], "zuid": ["2027-12-25", "2028-01-09"] },
+      "voorjaar": { "noord": ["2028-02-19", "2028-02-27"], "midden": ["2028-02-26", "2028-03-05"], "zuid": ["2028-02-26", "2028-03-05"] },
+      "mei": { "noord": ["2028-04-29", "2028-05-07"], "midden": ["2028-04-29", "2028-05-07"], "zuid": ["2028-04-29", "2028-05-07"] },
+      "zomer": { "noord": ["2028-07-15", "2028-08-27"], "midden": ["2028-07-08", "2028-08-20"], "zuid": ["2028-07-22", "2028-09-03"] },
+      "adviesMei": ["2028-04-22", "2028-04-30"]
+    },
+    "2028": {
+      "bron": "rijks-sv-2028",
+      "herfst": { "noord": ["2028-10-14", "2028-10-22"], "midden": ["2028-10-21", "2028-10-29"], "zuid": ["2028-10-21", "2028-10-29"] },
+      "kerst": { "noord": ["2028-12-23", "2029-01-07"], "midden": ["2028-12-23", "2029-01-07"], "zuid": ["2028-12-23", "2029-01-07"] },
+      "voorjaar": { "noord": ["2029-02-17", "2029-02-25"], "midden": ["2029-02-17", "2029-02-25"], "zuid": ["2029-02-10", "2029-02-18"] },
+      "mei": { "noord": ["2029-04-28", "2029-05-06"], "midden": ["2029-04-28", "2029-05-06"], "zuid": ["2029-04-28", "2029-05-06"] },
+      "zomer": { "noord": ["2029-07-21", "2029-09-02"], "midden": ["2029-07-07", "2029-08-19"], "zuid": ["2029-07-14", "2029-08-26"] },
+      "adviesMei": ["2029-04-21", "2029-04-29"]
+    },
+    "2029": {
+      "bron": "rijks-sv-2029",
+      "herfst": { "noord": ["2029-10-20", "2029-10-28"], "midden": ["2029-10-20", "2029-10-28"], "zuid": ["2029-10-13", "2029-10-21"] },
+      "kerst": { "noord": ["2029-12-22", "2030-01-06"], "midden": ["2029-12-22", "2030-01-06"], "zuid": ["2029-12-22", "2030-01-06"] },
+      "voorjaar": { "noord": ["2030-02-16", "2030-02-24"], "midden": ["2030-02-23", "2030-03-03"], "zuid": ["2030-02-23", "2030-03-03"] },
+      "mei": { "noord": ["2030-04-27", "2030-05-05"], "midden": ["2030-04-27", "2030-05-05"], "zuid": ["2030-04-27", "2030-05-05"] },
+      "zomer": { "noord": ["2030-07-20", "2030-09-01"], "midden": ["2030-07-13", "2030-08-25"], "zuid": ["2030-07-06", "2030-08-18"] },
+      "adviesMei": ["2030-04-20", "2030-04-28"]
+    }
+  },
+  "regios": {
+    "bron": "rijks-regios",
+    "provincies": {
+      "Drenthe": { "regio": "noord" },
+      "Flevoland": { "regio": "noord", "uitzonderingen": { "midden": ["Zeewolde"] } },
+      "Friesland": { "regio": "noord" },
+      "Gelderland": { "regio": null, "gemeenten": { "noord": ["Hattem"], "midden": ["Aalten", "Apeldoorn", "Barneveld", "Berkelland", "Bronckhorst", "Brummen", "Buren", "Culemborg", "Doetinchem", "Ede", "Elburg", "Epe", "Ermelo", "Harderwijk", "Heerde", "Lochem", "Montferland (behalve voormalig Didam)", "Neder-Betuwe (behalve voormalig Dodewaard)", "Nijkerk", "Nunspeet", "Oldebroek", "Oost-Gelre", "Oude IJsselstreek", "Putten", "Scherpenzeel", "Tiel", "Voorst", "Wageningen", "West Betuwe", "Winterswijk", "Zutphen"], "zuid": ["Arnhem", "Berg en Dal", "Beuningen", "Doesburg", "Druten", "Duiven", "Heumen", "Neder-Betuwe (alleen voormalig Dodewaard)", "Lingewaard", "Maasdriel", "Montferland (alleen voormalig Didam)", "Nijmegen", "Overbetuwe", "Renkum", "Rheden", "Rozendaal", "Rijnwaarden", "Westervoort", "West Maas en Waal", "Wijchen", "Zaltbommel", "Zevenaar"] } },
+      "Groningen": { "regio": "noord" },
+      "Limburg": { "regio": "zuid" },
+      "Noord-Brabant": { "regio": "zuid", "uitzonderingen": { "midden": ["Altena (behalve de kernen Hank en Dussen)"] } },
+      "Noord-Holland": { "regio": "noord" },
+      "Overijssel": { "regio": "noord" },
+      "Utrecht": { "regio": "midden", "uitzonderingen": { "noord": ["Eemnes", "De Ronde Venen (voormalige gemeente Abcoude)"] } },
+      "Zeeland": { "regio": "zuid" },
+      "Zuid-Holland": { "regio": "midden" }
+    }
+  }
+}

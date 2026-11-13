@@ -1,0 +1,20 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { route } from '../../i18n/routes';
+import { AUTHOR_NAME, CONTACT_EMAIL, LAST_UPDATED, REVIEW_CYCLE_MONTHS } from '../../data/site-config';
+const lang = 'en';
+---
+<PageLayout title="Editorial policy Feestdagenwijzer: sources, checks, corrections" description="How Feestdagenwijzer checks Dutch holidays and school breaks: only government sources and wetten.overheid.nl, dated, tested and corrected as soon as an error is reported." lang={lang} noindex={true} breadcrumbs={[{ label: 'Editorial policy' }]} showAuthor={false}>
+  <div class="prose prose-slate max-w-none">
+    <h1>Editorial policy</h1>
+    <p>Every date on this site comes from a calculation engine tested against the government lists. Texts never type dates by hand: they take them from the same engine as the tools, so text and results cannot drift apart.</p>
+    <h2>Sources</h2>
+    <p>Primary sources only: rijksoverheid.nl for holidays, days-off questions and school breaks, wetten.overheid.nl for the General Time Limits Act. Each page lists its sources at the bottom with the date they were read.</p>
+    <h2>Checks</h2>
+    <p>Automated tests run on every change: Gauss's Easter against Meeus over a thousand years, the 2026 and 2027 lists against the government, school breaks by region against the overviews. {AUTHOR_NAME} rereads the sources at least every {REVIEW_CYCLE_MONTHS} months and whenever the government publishes a new school year. Last check: {LAST_UPDATED}.</p>
+    <h2>Corrections</h2>
+    <p>A reported error is compared with the source and, if confirmed, fixed within days. Write to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. See also the <a href={route('method', lang)}>method</a>.</p>
+    <h2>Independence</h2>
+    <p>No paid placement, no affiliate links, no travel offers. The site is not linked to the government, a union or an employer.</p>
+  </div>
+</PageLayout>

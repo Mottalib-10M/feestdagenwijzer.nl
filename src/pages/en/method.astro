@@ -1,0 +1,39 @@
+---
+/** Method: sources, Easter, days off, bridge days, working days, school breaks, deadlines, tests, limits. Every figure from the engine. */
+import PageLayout from '../../layouts/PageLayout.astro';
+import { route } from '../../i18n/routes';
+import { KIT as K } from '../../lib/kit';
+import { srcLink } from '../../lib/helpers';
+import { breadcrumbSchema, webPageSchema } from '../../lib/seo';
+import { displayDate } from '../../lib/format';
+const lang = 'en';
+const path = route('method', lang);
+const title = 'Feestdagenwijzer calculations: sources, Easter, bridge days';
+const description = 'How Feestdagenwijzer works: government holiday lists, Easter by Gauss and Meeus, bridge days, working days, school breaks and the General Time Limits Act.';
+const s = (k: string, t: string) => srcLink(k, lang, t);
+const d = (iso: string) => displayDate(iso, 'en-GB');
+const g = K.gaussStappen(2027);
+const bd = K.brugdagen(2027);
+---
+<PageLayout title={title} description={description} lang={lang} jsonLd={[webPageSchema({ name: title, description, path, lang }), breadcrumbSchema([{ name: 'Home', path: route('home', lang) }, { name: 'Method', path }])]} breadcrumbs={[{ label: 'Method' }]}>
+  <article class="prose prose-slate max-w-none">
+    <h1>Method: how Feestdagenwijzer calculates</h1>
+    <p>Every tool runs on one engine in your browser. Below, for each part, the rule we follow, its source and how we test it. Data read on {d(K.LEESDATUM)}.</p>
+    <h2>The eleven official holidays</h2>
+    <p>The list follows the <Fragment set:html={s('gov-feestdagen-en', 'government')} />: New Year's Day, Good Friday, Easter Sunday and Monday, King's Day, Liberation Day, Ascension Day, Whit Sunday and Monday, Christmas Day and Boxing Day. King's Day is 27 April unless that is a Sunday, when it moves to Saturday 26 April (as in 2025 and 2031). A holiday at the weekend is not replaced by another day in the Netherlands.</p>
+    <h2>Easter by Gauss, checked with Meeus</h2>
+    <p>Easter is the first Sunday after the first full moon on or after 21 March. We compute it with Gauss's Easter formula and its Gregorian corrections. For 2027 the Easter limit, the ecclesiastical full moon, falls on March day {g.OG}; the next Sunday comes {g.OE} days later, on March day {g.OS}, so Easter falls on {d(K.paaszondag(2027))}. A second method, Meeus's, must give the same date for every year from 1600 to 2600, or the test fails. Ascension follows 39 days after Easter, Whitsun 49 days, Good Friday 2 days before.</p>
+    <h2>Who has the day off</h2>
+    <p>No law gives employees a holiday off; the collective agreement (cao) or contract does (<Fragment set:html={s('rijks-cao', 'what a cao is')} />). For each holiday we follow what the government writes on its Q&amp;A pages: Easter Monday, King's Day, Ascension and Whit Monday are off at most companies and off for civil servants; on <Fragment set:html={s('rijks-goede-vrijdag', 'Good Friday')} /> you will probably work; on <Fragment set:html={s('rijks-bevrijdingsdag', 'Liberation Day')} /> not everyone is off. By default we therefore count Good Friday and 5 May as working days; every tool lets you switch them on.</p>
+    <h2>Bridge days and leave planning</h2>
+    <p>A true bridge day is a single working day between a holiday off and the weekend, or between two days off. In 2027 those are {bd.map((b) => d(b.verlofVan)).join(' and ')}. For a number of leave days, the planner finds the set of blocks giving the most consecutive days off (dynamic programming over every working block of one to ten days next to a day off); on a tie, the block with the best return per leave day wins.</p>
+    <h2>Working days</h2>
+    <p>Working days are Monday to Friday minus the holidays off under your choice. In 2027 the year has {K.weekdagen(2027)} weekdays and, by default, {K.werkdagen(2027).reduce((a, b) => a + b, 0)} working days.</p>
+    <h2>School holidays by region</h2>
+    <p>Dates come from the government overviews for <Fragment set:html={s('rijks-sv-2026', '2026-2027')} />, <Fragment set:html={s('rijks-sv-2027', '2027-2028')} />, <Fragment set:html={s('rijks-sv-2028', '2028-2029')} /> and <Fragment set:html={s('rijks-sv-2029', '2029-2030')} />, copied as published. Autumn and spring breaks are advisory: schools may deviate. The split of provinces and municipalities into North, Central and South follows the <Fragment set:html={s('rijks-regios', 'regional split')} />, with the exceptions listed there per municipality.</p>
+    <h2>Deadlines</h2>
+    <p>The <Fragment set:html={s('termijnenwet', 'General Time Limits Act')} /> extends a statutory deadline ending on a Saturday, Sunday or generally recognised holiday to the next day that is none of these (section 1). Section 3 recognises New Year's Day, Easter Monday, Ascension Day, Whit Monday, both Christmas days, the day the King's birthday is celebrated and 5 May; Good Friday is treated the same by royal decree. Section 2 makes sure a deadline of at least three days contains at least two working days.</p>
+    <h2>Licence and limits</h2>
+    <p>The government publishes under <Fragment set:html={s('rijks-copyright', 'CC0 1.0')} />. This site does not know your agreement, your school's training days or a town's local holidays. We show no dates beyond the last published school year.</p>
+  </article>
+</PageLayout>

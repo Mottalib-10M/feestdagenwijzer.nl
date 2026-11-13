@@ -1,0 +1,20 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { CONTACT_EMAIL } from '../../data/site-config';
+import { route } from '../../i18n/routes';
+import { contactPageSchema } from '../../lib/seo';
+const lang = 'nl';
+const description = 'Meld ons een feestdag, brugdag of schoolvakantie die niet klopt, of vraag hoe u de aftelling naar de volgende feestdag op uw eigen website plaatst.';
+---
+<PageLayout title="Contact Feestdagenwijzer: fout melden of widget plaatsen" description={description} lang={lang} noindex={true} jsonLd={[contactPageSchema({ name: 'Contact', description, path: route('contact', lang), lang })]} breadcrumbs={[{ label: 'Contact' }]} showAuthor={false}>
+  <div class="prose prose-slate max-w-none">
+    <h1>Contact</h1>
+    <p>Per e-mail, antwoord doorgaans binnen een week: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+    <h2>Er staat een fout op een pagina</h2>
+    <p>Noem de pagina, de datum die volgens u niet klopt en, als u die heeft, de bekendmaking van de Rijksoverheid of uw cao waar het anders staat. We leggen het naast de bron en passen de pagina aan als we ons vergist hebben.</p>
+    <h2>De aftelling op uw site</h2>
+    <p>Personeelsverenigingen, sportclubs, scholen en lokale media kunnen de aftelling naar de volgende feestdag gratis plaatsen: zie <a href={route('widget', lang)}>widget</a>.</p>
+    <h2>Waar we niet bij helpen</h2>
+    <p>We geven geen juridisch advies over uw verlof of uw cao, kennen de studiedagen van een bepaalde school niet en verkopen geen reizen.</p>
+  </div>
+</PageLayout>

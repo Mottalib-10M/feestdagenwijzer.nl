@@ -1,0 +1,20 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { CONTACT_EMAIL } from '../../data/site-config';
+import { route } from '../../i18n/routes';
+import { contactPageSchema } from '../../lib/seo';
+const lang = 'en';
+const description = 'Tell us about a Dutch public holiday, bridge day or school break that looks wrong, or ask how to show the countdown to the next holiday on your own website.';
+---
+<PageLayout title="Contact Feestdagenwijzer: report an error or embed the tool" description={description} lang={lang} noindex={true} jsonLd={[contactPageSchema({ name: 'Contact', description, path: route('contact', lang), lang })]} breadcrumbs={[{ label: 'Contact' }]} showAuthor={false}>
+  <div class="prose prose-slate max-w-none">
+    <h1>Contact</h1>
+    <p>By email, usually answered within a week: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+    <h2>Something on a page is wrong</h2>
+    <p>Name the page, the date you think is wrong and, if you have it, the government notice or agreement that says otherwise. We compare it with the source and correct the page if we made a mistake.</p>
+    <h2>The countdown on your site</h2>
+    <p>Staff associations, sports clubs, schools and local media can show the countdown to the next holiday for free: see <a href={route('widget', lang)}>widget</a>.</p>
+    <h2>What we cannot help with</h2>
+    <p>We give no legal advice on your leave or agreement, do not know the training days of a particular school and sell no trips.</p>
+  </div>
+</PageLayout>

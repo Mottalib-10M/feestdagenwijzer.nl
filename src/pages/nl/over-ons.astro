@@ -1,0 +1,32 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import LegalIdentity from '../../components/LegalIdentity.astro';
+import { route } from '../../i18n/routes';
+import { AUTHOR_NAME, AUTHOR_DESC, CONTACT_EMAIL, SITE_NAMES } from '../../data/site-config';
+import { srcLink } from '../../lib/helpers';
+import { profilePageSchema, breadcrumbSchema } from '../../lib/seo';
+const lang = 'nl';
+const path = route('about', lang);
+const title = 'Feestdagenwijzer: uitgever, bronnen en onafhankelijkheid';
+const description = 'Wie Feestdagenwijzer maakt: Radif Partners, onafhankelijk van overheid, vakbond en werkgever. Waar de feestdagen, brugdagen en schoolvakanties vandaan komen.';
+const s = (k: string, t: string) => srcLink(k, lang, t);
+---
+<PageLayout title={title} description={description} lang={lang} jsonLd={[profilePageSchema({ path, lang }), breadcrumbSchema([{ name: 'Start', path: route('home', lang) }, { name: 'Over ons', path }])]} breadcrumbs={[{ label: 'Over ons' }]}>
+  <article class="prose prose-slate max-w-none">
+    <h1>Over {SITE_NAMES[lang]}</h1>
+    <p>{AUTHOR_DESC.nl}</p>
+    <h2>Waarom deze site er is</h2>
+    <p>Wie “feestdagen 2027” zoekt, vond in november 2026 vooral lijsten: sommige nog met de feestdagen van 2023, andere met Hemelvaart op de verkeerde donderdag, en geen enkele die uitrekende wat een verlofdag rond een feestdag oplevert. Deze site zet de officiële lijst naast de weekdag, zegt per feestdag wat de Rijksoverheid over vrij zijn schrijft, rekent de brugdagen en werkdagen uit en legt de schoolvakanties van de drie regio’s ernaast.</p>
+    <h2>Wie de site uitgeeft</h2>
+    <p>De uitgever is {AUTHOR_NAME}, een bedrijf dat rekenhulpen bouwt op publieke regels. {AUTHOR_NAME} is geen overheidsdienst, geen vakbond en geen werkgeversorganisatie, heeft geen band met een ministerie en gebruikt geen officiële logo’s. De site verkoopt geen reizen of vakantiehuizen en heeft geen affiliatielinks.</p>
+    <LegalIdentity lang={lang} />
+    <h2>Waar de gegevens vandaan komen</h2>
+    <p>De feestdagen staan in de <Fragment set:html={s('rijks-feestdagen', 'lijst van de Rijksoverheid')} />, de schoolvakanties in de <Fragment set:html={s('rijks-sv-2026', 'overzichten per schooljaar')} /> en de <Fragment set:html={s('rijks-regios', 'regio-indeling')} />. De Rijksoverheid publiceert die onder <Fragment set:html={s('rijks-copyright', 'CC0 1.0')} />. Voor termijnen geldt de <Fragment set:html={s('termijnenwet', 'Algemene termijnenwet')} />. Hoe alles berekend wordt, staat bij de <a href={route('method', lang)}>methode</a>; hoe we fouten verbeteren, in het <a href={route('editorial', lang)}>redactiebeleid</a>.</p>
+    <h2>Uw gegevens</h2>
+    <p>Elke rekenhulp werkt in uw browser. Wat u invult, wordt niet verstuurd en niet bewaard; er is geen account. Zie de <a href={route('privacy', lang)}>privacyverklaring</a>.</p>
+    <h2>Wat de site niet doet</h2>
+    <p>Ze beslist niets over uw verlof en kent uw cao niet. Of u op Goede Vrijdag of 5 mei vrij bent, vraagt u na bij uw werkgever.</p>
+    <h2>Schrijf ons</h2>
+    <p><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> als een datum of een uitleg niet klopt.</p>
+  </article>
+</PageLayout>

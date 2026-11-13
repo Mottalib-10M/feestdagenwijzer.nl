@@ -1,0 +1,20 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { route } from '../../i18n/routes';
+import { AUTHOR_NAME, CONTACT_EMAIL, LAST_UPDATED, REVIEW_CYCLE_MONTHS } from '../../data/site-config';
+const lang = 'nl';
+---
+<PageLayout title="Redactiebeleid Feestdagenwijzer: bronnen, controle, correcties" description="Hoe Feestdagenwijzer feestdagen en schoolvakanties nagaat: alleen bronnen van de Rijksoverheid en wetten.overheid.nl, gedateerd, getest en verbeterd zodra er een fout gemeld wordt." lang={lang} noindex={true} breadcrumbs={[{ label: 'Redactiebeleid' }]} showAuthor={false}>
+  <div class="prose prose-slate max-w-none">
+    <h1>Redactiebeleid</h1>
+    <p>Elke datum op deze site komt uit een rekenmotor die getest wordt tegen de lijsten van de Rijksoverheid. Teksten typen geen datums met de hand: ze halen ze uit dezelfde motor als de rekenhulpen, zodat tekst en uitkomst niet uit elkaar kunnen lopen.</p>
+    <h2>Bronnen</h2>
+    <p>Alleen primaire bronnen: rijksoverheid.nl voor feestdagen, vragen over vrij zijn en schoolvakanties, wetten.overheid.nl voor de Algemene termijnenwet. Elke pagina noemt haar bronnen onderaan, met de datum waarop ze gelezen zijn.</p>
+    <h2>Controle</h2>
+    <p>Bij elke wijziging draaien geautomatiseerde tests: Pasen volgens Gauss tegen Meeus over duizend jaar, de lijsten 2026 en 2027 tegen de Rijksoverheid, de schoolvakanties per regio tegen de overzichten. {AUTHOR_NAME} leest de bronnen minstens elke {REVIEW_CYCLE_MONTHS} maanden opnieuw en zodra de overheid een nieuw schooljaar publiceert. Laatste controle: {LAST_UPDATED}.</p>
+    <h2>Correcties</h2>
+    <p>Een gemelde fout wordt naast de bron gelegd en, als ze klopt, binnen enkele dagen verbeterd. Schrijf naar <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. Zie ook de <a href={route('method', lang)}>methode</a>.</p>
+    <h2>Onafhankelijkheid</h2>
+    <p>Geen betaalde vermelding, geen affiliatie, geen reisaanbod. De site is niet verbonden aan de overheid, een vakbond of een werkgever.</p>
+  </div>
+</PageLayout>

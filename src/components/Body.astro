@@ -1,0 +1,20 @@
+---
+/** De HTML-tekst van een inhoudsbestand, met de mini-rekenhulpen als eilanden. */
+import MiniSim from './calc/MiniSim';
+import { miniHref } from '../lib/mini-targets';
+import type { Lang } from '../lib/format';
+interface Props { html: string; path: string; lang: Lang }
+const { html, path, lang } = Astro.props;
+const parts = html.split(/<!--mini:([A-Za-z0-9_]+)(?:\|([A-Za-z0-9+/=]+))?-->/);
+const decode = (b?: string): { t?: string; d?: Record<string, number>; c?: string; e?: string } => (b ? JSON.parse(Buffer.from(b, 'base64').toString('utf8')) : {});
+let n = 0;
+---
+<div class="prose prose-slate max-w-none">
+  {parts.map((p, i) => {
+    if (i % 3 === 0) return <Fragment set:html={p ?? ''} />;
+    if (i % 3 === 2) return null;
+    const a = decode(parts[i + 1]);
+    n += 1;
+    return <div data-chrome class="not-prose"><MiniSim client:load kind={p} lang={lang} title={a.t} defaults={a.d} exemple={a.e} idPrefix={`m${n}`} href={miniHref(p, lang, path)} /></div>;
+  })}
+</div>

@@ -1,0 +1,39 @@
+---
+/** Methode: bronnen, Pasen, wie is vrij, brugdagen, werkdagen, schoolvakanties, termijnen, tests, grenzen. Elk getal uit de motor. */
+import PageLayout from '../../layouts/PageLayout.astro';
+import { route } from '../../i18n/routes';
+import { KIT as K } from '../../lib/kit';
+import { srcLink } from '../../lib/helpers';
+import { breadcrumbSchema, webPageSchema } from '../../lib/seo';
+import { displayDate } from '../../lib/format';
+const lang = 'nl';
+const path = route('method', lang);
+const title = 'Feestdagenwijzer rekent zo: bronnen, Pasen, brugdagen, tests';
+const description = 'Zo rekent Feestdagenwijzer: feestdagen van de Rijksoverheid, Pasen met Gauss en Meeus, brugdagen, werkdagen, schoolvakanties en de Algemene termijnenwet.';
+const s = (k: string, t: string) => srcLink(k, lang, t);
+const d = (iso: string) => displayDate(iso, 'nl-NL');
+const g = K.gaussStappen(2027);
+const bd = K.brugdagen(2027);
+---
+<PageLayout title={title} description={description} lang={lang} jsonLd={[webPageSchema({ name: title, description, path, lang }), breadcrumbSchema([{ name: 'Start', path: route('home', lang) }, { name: 'Methode', path }])]} breadcrumbs={[{ label: 'Methode' }]}>
+  <article class="prose prose-slate max-w-none">
+    <h1>Methode: zo rekent Feestdagenwijzer</h1>
+    <p>Alle rekenhulpen draaien op één motor in uw browser. Hieronder staat per onderdeel welke regel we volgen, uit welke bron en hoe we dat controleren. Gegevens gelezen op {d(K.LEESDATUM)}.</p>
+    <h2>De elf officiële feestdagen</h2>
+    <p>De lijst volgt de <Fragment set:html={s('rijks-feestdagen', 'Rijksoverheid')} />: Nieuwjaarsdag, Goede Vrijdag, Eerste en Tweede Paasdag, Koningsdag, Bevrijdingsdag, Hemelvaartsdag, Eerste en Tweede Pinksterdag, Eerste en Tweede Kerstdag. Koningsdag is 27 april, behalve als dat een zondag is: dan wordt hij op zaterdag 26 april gevierd (zo in 2025 en 2031). Een feestdag in het weekend wordt in Nederland niet vervangen door een andere dag.</p>
+    <h2>Pasen met Gauss, gecontroleerd met Meeus</h2>
+    <p>Pasen is de eerste zondag na de eerste volle maan op of na 21 maart. Wij rekenen het met de paasformule van Gauss, met de correcties voor de Gregoriaanse kalender. Voor 2027 ligt de paasgrens, de kerkelijke volle maan, op maartdag {g.OG}; de eerstvolgende zondag ligt {g.OE} dagen later, op maartdag {g.OS}, dus Pasen valt op {d(K.paaszondag(2027))}. Een tweede methode, die van Meeus, moet voor elk jaar van 1600 tot 2600 dezelfde datum geven; de test faalt anders. Hemelvaart volgt 39 dagen na Pasen, Pinksteren 49 dagen, Goede Vrijdag 2 dagen ervoor.</p>
+    <h2>Wie er vrij is</h2>
+    <p>Geen wet geeft werknemers vrij op een feestdag; dat staat in de cao of het contract (<Fragment set:html={s('rijks-cao', 'wat een cao is')} />). Per feestdag nemen we over wat de Rijksoverheid op haar vraag-en-antwoordpagina’s schrijft: Tweede Paasdag, Koningsdag, Hemelvaart en Tweede Pinksterdag zijn bij de meeste bedrijven vrij en voor ambtenaren vrij; op <Fragment set:html={s('rijks-goede-vrijdag', 'Goede Vrijdag')} /> moet u waarschijnlijk werken; op <Fragment set:html={s('rijks-bevrijdingsdag', 'Bevrijdingsdag')} /> is niet iedereen vrij. Standaard rekenen we Goede Vrijdag en 5 mei dus als werkdag; in elke rekenhulp kunt u ze aanzetten.</p>
+    <h2>Brugdagen en verlofplanning</h2>
+    <p>Een echte brugdag is één werkdag tussen een vrije feestdag en het weekend, of tussen twee vrije dagen. In 2027 zijn dat {bd.map((b) => d(b.verlofVan)).join(' en ')}. De planner zoekt voor een aantal verlofdagen de combinatie van blokken met de meeste vrije dagen achter elkaar (dynamisch programmeren over alle werkblokken van één tot tien dagen naast een vrije dag); bij gelijke uitkomst wint het blok met het hoogste rendement per verlofdag.</p>
+    <h2>Werkdagen</h2>
+    <p>Werkdagen zijn maandag tot en met vrijdag zonder de vrije feestdagen volgens uw keuze. In 2027 telt het jaar {K.weekdagen(2027)} weekdagen en, met de standaardkeuze, {K.werkdagen(2027).reduce((a, b) => a + b, 0)} werkdagen.</p>
+    <h2>Schoolvakanties per regio</h2>
+    <p>De data komen uit de overzichten van de Rijksoverheid voor <Fragment set:html={s('rijks-sv-2026', '2026-2027')} />, <Fragment set:html={s('rijks-sv-2027', '2027-2028')} />, <Fragment set:html={s('rijks-sv-2028', '2028-2029')} /> en <Fragment set:html={s('rijks-sv-2029', '2029-2030')} />, letterlijk overgenomen. De herfst- en voorjaarsvakantie zijn adviesdata: scholen mogen afwijken. De indeling van provincies en gemeenten in Noord, Midden en Zuid volgt de <Fragment set:html={s('rijks-regios', 'regio-indeling')} />, met de uitzonderingen die daar per gemeente staan.</p>
+    <h2>Termijnen</h2>
+    <p>De <Fragment set:html={s('termijnenwet', 'Algemene termijnenwet')} /> verlengt een wettelijke termijn die eindigt op zaterdag, zondag of een algemeen erkende feestdag tot de eerstvolgende dag die dat niet is (artikel 1). Erkend zijn volgens artikel 3: Nieuwjaarsdag, Tweede Paasdag, Hemelvaartsdag, Tweede Pinksterdag, beide Kerstdagen, de dag waarop de verjaardag van de Koning wordt gevierd en 5 mei; Goede Vrijdag is bij koninklijk besluit met die dagen gelijkgesteld. Artikel 2 zorgt dat een termijn van ten minste drie dagen ten minste twee werkdagen bevat.</p>
+    <h2>Licentie en grenzen</h2>
+    <p>De Rijksoverheid publiceert onder <Fragment set:html={s('rijks-copyright', 'CC0 1.0')} />. Deze site kent uw cao niet, niet de studiedagen van uw school en niet de lokale feestdagen van een gemeente. Data na het laatst gepubliceerde schooljaar tonen we niet.</p>
+  </article>
+</PageLayout>

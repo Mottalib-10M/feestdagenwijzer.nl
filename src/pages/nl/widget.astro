@@ -1,0 +1,23 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { SITE_URL } from '../../data/site-config';
+import { route } from '../../i18n/routes';
+import { breadcrumbSchema } from '../../lib/seo';
+const lang = 'nl';
+const code = `<iframe src="${SITE_URL}/embed/${lang}/feestdagen/" title="Aftelling naar de volgende Nederlandse feestdag" width="100%" height="560" style="border:0;max-width:1100px" loading="lazy"></iframe>`;
+---
+<PageLayout title="Feestdagenwijzer insluiten: aftelling naar de volgende feestdag" description="Plaats de aftelling naar de volgende Nederlandse feestdag gratis op de site van uw vereniging, school of redactie: code één keer kopiëren, nieuwe jaren verschijnen vanzelf." lang={lang} noindex={true} jsonLd={[breadcrumbSchema([{ name: 'Start', path: route('home', lang) }, { name: 'Widget', path: route('widget', lang) }])]} breadcrumbs={[{ label: 'Widget' }]} showAuthor={false}>
+  <header class="mb-6">
+    <h1 class="text-3xl font-bold text-navy-900 md:text-4xl">Feestdagenwijzer insluiten</h1>
+    <p class="mt-3 text-lg text-navy-700">Voor personeelsverenigingen, sportclubs, scholen en lokale media: één keer kopiëren, daarna loopt de aftelling vanzelf door naar het volgende jaar.</p>
+  </header>
+  <div class="prose prose-slate max-w-none">
+    <h2>Aftelling naar de volgende feestdag</h2>
+    <p>Bezoekers zien hoe lang het nog duurt tot de volgende officiële feestdag, of die meestal vrij is, de feestdagen erna en de eerstvolgende schoolvakantie van hun regio.</p>
+    <pre class="overflow-x-auto rounded-lg bg-navy-900 p-4 text-sm text-white"><code>{code}</code></pre>
+    <p>Voor de Engelse versie vervangt u /embed/nl/ door /embed/en/. Voorwaarden: de bronregel onder de aftelling blijft zichtbaar, de aftelling wordt niet gewijzigd en wordt geleverd zonder garantie. Wat bezoekers kiezen, blijft op hun toestel. Vragen via <a href={route('contact', lang)}>contact</a>.</p>
+  </div>
+  <div class="mt-8 overflow-hidden rounded-xl border border-navy-200">
+    <iframe src={`/embed/${lang}/feestdagen/`} title="Aftelling naar de volgende Nederlandse feestdag" width="100%" height="560" style="border:0" loading="lazy"></iframe>
+  </div>
+</PageLayout>

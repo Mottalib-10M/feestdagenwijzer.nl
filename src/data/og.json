@@ -1,0 +1,20 @@
+{
+ "accent": "#C2410C",
+ "symbol": "vrij",
+ "variants": [
+  {
+   "file": "og-nl.png",
+   "title": "Feestdagen 2027\nen de beste brugdagen",
+   "subtitle": "Pasen · Koningsdag · Hemelvaart · Pinksteren · werkdagen · schoolvakanties",
+   "badge": "Data Rijksoverheid · nagekeken op 13 november 2026",
+   "brand": "Feestdagenwijzer"
+  },
+  {
+   "file": "og-en.png",
+   "title": "Dutch public holidays 2027\nand the best bridge days",
+   "subtitle": "Easter · King's Day · Ascension · Whitsun · working days · school holidays",
+   "badge": "Central government data · checked 13 November 2026",
+   "brand": "Feestdagenwijzer"
+  }
+ ]
+}
