@@ -27,7 +27,7 @@ export default defineGuide({
 <p>De ${h.src('rijks-goede-vrijdag', 'vraag-en-antwoordpagina van de Rijksoverheid')} maakt onderscheid tussen werknemers, ambtenaren en scholieren. De rekenhulp bovenaan volgt die indeling. In het kort: werknemers en ambtenaren werken meestal, scholieren zijn meestal vrij. Het eigenlijke antwoord staat in uw ${h.src('rijks-cao', 'cao')}: daar staat welke feestdagen vrij zijn, en of u bij werken een toeslag krijgt.</p>
 <h2>Wat Goede Vrijdag u kost of oplevert</h2>
 <p>Is Goede Vrijdag geen vrije dag, dan kost een lang paasweekend één verlofdag. In ${Y} is het jaar dan ${N(w0, 'nl')} werkdagen lang. Geeft uw werkgever de dag wel vrij, dan zijn het er ${N(w1, 'nl')}. Zet de optie in de ${h.a('brugdagen-2027', 'brugdagenplanner')} aan om te zien hoe uw verlofplan verandert.</p>
-${h.mini('werk', { t: 'Werkdagen 2027 bij uw aantal dagen per week', d: { jaar: 2027, week: 5 }, e: 'Voorbeeld voor 2027 bij 5 dagen per week, Goede Vrijdag als werkdag' })}
+${h.mini('werk', { t: 'Werkdagen 2027 bij uw aantal dagen per week', d: { jaar: 2027, week: 5 }, e: 'Voorbeeld voor 2027 bij 5 dagen per week (Goede Vrijdag telt hier altijd als werkdag)' })}
 <h2>Goede Vrijdag en termijnen</h2>
 <p>Bij termijnen is het anders: de ${h.src('termijnenwet', 'Algemene termijnenwet')} stelt Goede Vrijdag gelijk aan de erkende feestdagen. Een bezwaartermijn of betaaltermijn die op ${h.wday(gv)} eindigt, verloopt pas op ${h.wday(term.verlengd)}. Reken het uit op ${h.a('termijnen-feestdagen', 'termijnen en feestdagen')}.</p>`,
   },
@@ -47,7 +47,7 @@ ${h.mini('werk', { t: 'Werkdagen 2027 bij uw aantal dagen per week', d: { jaar: 
 <p>The ${h.src('rijks-goede-vrijdag', 'government Q&amp;A page')} separates employees, civil servants and pupils, and the tool above follows that split. In short: employees and civil servants usually work, pupils are usually off. The real answer is in your ${h.src('rijks-cao', 'collective agreement')}: it lists which holidays are off and whether working them earns a premium.</p>
 <h2>What Good Friday costs or gives you</h2>
 <p>If Good Friday is not a day off, a long Easter weekend costs one leave day, and ${Y} has ${N(w0, 'en')} working days. If your employer gives it off, there are ${N(w1, 'en')}. Switch the option on in the ${h.a('brugdagen-2027', 'bridge-day planner')} to see how your leave plan changes.</p>
-${h.mini('werk', { t: 'Working days 2027 at your days per week', d: { jaar: 2027, week: 5 }, e: 'Example for 2027 at 5 days a week, Good Friday as a working day' })}
+${h.mini('werk', { t: 'Working days 2027 at your days per week', d: { jaar: 2027, week: 5 }, e: 'Example for 2027 at 5 days a week (Good Friday always counts as a working day here)' })}
 <h2>Good Friday and deadlines</h2>
 <p>Deadlines work differently: the ${h.src('termijnenwet', 'General Time Limits Act')} treats Good Friday like the recognised holidays. An objection or payment deadline ending on ${h.wday(gv)} only expires on ${h.wday(term.verlengd)}. Work it out on ${h.a('termijnen-feestdagen', 'deadlines and holidays')}.</p>`,
   },

@@ -110,16 +110,16 @@ describe('4. telling van de vrije weekdagen', () => {
 });
 
 describe('5. Nieuwjaar en Kerst: een antwoord in de kolom « Vrij? »', () => {
-  it('geen « Geen toelichting » meer; het label begint met wat de site rekent', () => {
+  it('geen « Geen toelichting » meer; tour 3: hetzelfde eenvoudige label als de andere gangbare feestdagen, elk jaar', () => {
     for (const id of ['nieuwjaarsdag', 'eerste-kerstdag', 'tweede-kerstdag'] as const) {
-      expect(STATUS_TEKST[VRIJ[id].bedrijf].nl).toBe('Telt hier als vrij (uw cao beslist)');
+      expect(STATUS_TEKST[VRIJ[id].bedrijf].nl).toBe(STATUS_TEKST[VRIJ['tweede-pinksterdag'].bedrijf].nl);
       expect(STATUS_TEKST[VRIJ[id].bedrijf].nl).not.toMatch(/geen toelichting/i);
     }
   });
   it('een feestdag op zaterdag of zondag zegt « geen extra vrije dag » (tour 2: « zaterdag … als vrij gerekend »)', () => {
     expect(vrijOpDatum('eerste-kerstdag', datum('eerste-kerstdag', 2027), 'bedrijf', 'nl')).toBe('Valt op zaterdag: geen extra vrije dag');
     expect(vrijOpDatum('nieuwjaarsdag', datum('nieuwjaarsdag', 2028), 'bedrijf', 'nl')).toBe('Valt op zaterdag: geen extra vrije dag');
-    expect(vrijOpDatum('eerste-kerstdag', datum('eerste-kerstdag', 2028), 'bedrijf', 'nl')).toBe('Telt hier als vrij (uw cao beslist)');
+    expect(vrijOpDatum('eerste-kerstdag', datum('eerste-kerstdag', 2028), 'bedrijf', 'nl')).toBe('Meestal vrij');
     const rows = getTool('ft', 'nl', { jaar: 2027 }).run({ jaar: '2027', pf: 'bedrijf' }).table!.rows;
     expect(rows.filter((r) => /zaterdag|zondag/.test(r[1])).every((r) => /geen extra vrije dag/.test(r[3]))).toBe(true);
   });

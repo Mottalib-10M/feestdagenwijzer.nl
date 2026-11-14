@@ -1,6 +1,6 @@
 /** Brugdagen 2027: de twee echte brugdagen, het meiblok, verlofplannen met 5 en 10 dagen, overlap met de meivakantie. */
 import { defineGuide } from '../../lib/page-types';
-import { K, D, DW, WD, SPAN, PER, N, F, OPT, BD, SV } from '../_k';
+import { K, D, DW, WD, DS, SPAN, PER, N, F, OPT, BD, SV } from '../_k';
 import type { Lang } from '../../lib/format';
 import { verlofNaarVrij } from '../../lib/tool-specs';
 
@@ -19,7 +19,7 @@ export default defineGuide({
   related: ['werkdagen-2027', 'hemelvaart-2027', 'koningsdag-2027', 'brugdagen-2028'],
   sources: ['rijks-feestdagen', 'rijks-koningsdag', 'rijks-hemelvaart', 'rijks-sv-2026'],
   nl: {
-    slug: 'brugdagen-2027', nav: 'Brugdagen 2027', card: `${N(bd.length, 'nl')} brugdagen; 5 verlofdagen = ${N(p5.vrij, 'nl')} dagen vrij`,
+    slug: 'brugdagen-2027', nav: 'Brugdagen 2027', card: `Brugdagen ${bd.map((b) => DS(b.verlofVan, 'nl')).join(' en ')}; 5 verlofdagen = ${N(p5.vrij, 'nl')} dagen vrij`,
     title: 'Brugdagen 2027: verlofplanner met de beste vrije dagen',
     description: `Brugdagen 2027 in Nederland: ${WD(bd[0].verlofVan, 'nl')} ${D(bd[0].verlofVan, 'nl')} en ${WD(bd[1].verlofVan, 'nl')} ${D(bd[1].verlofVan, 'nl')}. De planner legt uw verlofdagen zo dat u de meeste dagen achter elkaar vrij bent.`,
     h1: 'Brugdagen 2027: meer vrij met minder verlof',
@@ -40,7 +40,7 @@ ${h.mini('vrij', { t: 'Is 5 mei 2027 vrij in uw situatie?', d: { pf: 0, fd: 5 },
 <p>De meivakantie van ${h.per(mei)} geldt in Noord, Midden en Zuid tegelijk. Ouders die de week ervoor of erna vrij nemen, zitten dus nooit verkeerd per regio. De brug van ${h.day(bd[0].verlofVan)} valt al in de schoolvakantie; die van ${h.day(bd[1].verlofVan)} niet, al geven veel scholen die vrijdag vrij. Meer per regio op ${h.a('schoolvakanties-2026-2027', 'schoolvakanties 2026-2027')}.</p>`,
   },
   en: {
-    slug: 'bridge-days-2027', nav: 'Bridge days 2027', card: `${N(bd.length, 'en')} true bridge days; 5 leave days = ${N(p5.vrij, 'en')} days off`,
+    slug: 'bridge-days-2027', nav: 'Bridge days 2027', card: `Bridge days ${bd.map((b) => DS(b.verlofVan, 'en')).join(' and ')}; 5 leave days = ${N(p5.vrij, 'en')} days off`,
     title: "Bridge days 2027 Netherlands: leave planner, long weekends",
     description: "Bridge days 2027 in the Netherlands: Monday 26 April and Friday 7 May. The planner places your leave days to give you the longest runs of days off in a row.",
     h1: 'Bridge days 2027: more time off for less leave',

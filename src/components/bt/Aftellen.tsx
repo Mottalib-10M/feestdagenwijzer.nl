@@ -38,13 +38,17 @@ export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a', 
   const next = lijst[0];
   if (!next) return null;
   const left = Math.max(0, Date.parse(nederlandInstant(next.date)) - now);
-  const d = Math.floor(left / 864e5), h = Math.floor((left % 864e5) / 36e5), m = Math.floor((left % 36e5) / 6e4), s = Math.floor((left % 6e4) / 1e3);
+  const d = Math.floor(left / 864e5), h = Math.floor((left % 864e5) / 36e5), m = Math.floor((left % 36e5) / 6e4);
   const nf = new Intl.NumberFormat(lang === 'nl' ? 'nl-NL' : 'en-GB');
   const vandaag = next.date === today;
   const status = STATUS_TEKST[VRIJ[next.id].bedrijf][lang];
   const v0 = vak[0];
   return (
     <div className="rounded-xl border border-navy-200 bg-white p-4 sm:p-5">
+      {/* Tour 3 (testeurs 1 et 3, validé par l'éditeur) : sur la page 2027, « Eerste Kerstdag 2026 » semblait contredire
+          l'année de la page ; le bloc se titre d'abord « vanaf vandaag ». Les secondes qui défilent sont retirées. */}
+      <h2 className="mb-3 text-lg font-bold text-navy-900">{T(`Vanaf vandaag (${dLong(today, lang)}): hoe lang nog tot de volgende feestdag?`, `From today (${dLong(today, lang)}): how long until the next public holiday?`)}</h2>
+      <p className="-mt-2 mb-3 text-sm text-navy-600">{T(`Dit blok kijkt vanaf vandaag vooruit, ook als dat nog in ${today.slice(0, 4)} is.`, `This block looks ahead from today, even if that is still in ${today.slice(0, 4)}.`)}</p>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
         <form data-simulateur className="grid content-start grid-cols-1 gap-x-4 gap-y-3" onSubmit={(e) => e.preventDefault()}>
           <SelectField id={`${idPrefix}-regio`} label={T('Regio voor de schoolvakantie', 'Region for school holidays')} value={regio} onChange={(v) => { setRegio(v as Regio); setMoved(true); }} options={REGIOS.map((g) => ({ value: g, label: REGIO_NAAM[g][lang] }))} />
@@ -52,20 +56,22 @@ export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a', 
           <div className="rounded-lg border border-accent-200 bg-accent-50 px-4 py-3" data-chrome>
             <p className="text-sm font-medium text-navy-700">{vandaag ? T(`Vandaag is het ${next.name.nl}`, `Today is ${next.name.en}`) : T(`Vanaf vandaag nog tot ${next.name.nl} ${next.date.slice(0, 4)}`, `From today until ${next.name.en} ${next.date.slice(0, 4)}`)}</p>
             {!vandaag && <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1" aria-live="off">
-              {[[d, ui.days], [h, ui.hours], [m, ui.minutes], [s, ui.seconds]].map(([v, u]) => <span key={String(u)} className="inline-flex items-baseline gap-1"><span className="tabular-nums text-2xl font-bold text-navy-900">{nf.format(Number(v))}</span><span className="text-sm text-navy-600">{u}</span></span>)}
+              {[[d, ui.days], [h, ui.hours], [m, ui.minutes]].map(([v, u]) => <span key={String(u)} className="inline-flex items-baseline gap-1"><span className="tabular-nums text-2xl font-bold text-navy-900">{nf.format(Number(v))}</span><span className="text-sm text-navy-600">{u}</span></span>)}
             </p>}
             <p className="mt-1 text-xs text-navy-600">{T('Geteld tot middernacht in Nederland, met de klok van uw toestel.', 'Counted to midnight in the Netherlands, using your device clock.')}</p>
           </div>
         </form>
         {/* Testeurs naïfs 2026-11-14, tour 2 : sur la page 2027, ce bloc passait à 2026 sans prévenir (« vrijdag 25 december
             2026 » sous « 25 december 2027 zaterdag ») et donnait des dates sans année. Il dit d'où il compte, et chaque date a son année. */}
-        <ResultCard label={T(`Vanaf vandaag (${dLong(today, lang)}): de eerstvolgende feestdag`, `From today (${dLong(today, lang)}): the next public holiday`)} value={next.name[lang]} sub={dWeek(next.date, lang)}>
+        <ResultCard label={T('De eerstvolgende feestdag', 'The next public holiday')} value={next.name[lang]} sub={dWeek(next.date, lang)}>
+          {/* Tour 3 : la Kerstvakantie (2026) arrivait après Goede Vrijdag 2027 ; les lignes « Daarna » suivent le calendrier. */}
           <Rows rows={[
             [T('Vrij voor werknemers?', 'Day off for employees?'), isWeekend(fromIso(next.date)) ? T('Valt in het weekend', 'Falls on a weekend') : status],
-            ...lijst.slice(1, 4).map((f) => [T(`Daarna: ${f.name.nl}`, `Then: ${f.name.en}`), dShortY(f.date, lang)] as [string, string]),
-            ...(v0 ? [[`${VAK_NAAM[v0.vak][lang]} (${REGIO_NAAM[regio][lang]})`, v0.bezig ? T('nu bezig', 'now on') : dShortY(v0.p.van, lang)] as [string, string]] : []),
+            ...[
+              ...lijst.slice(1, 4).map((f) => [f.date, T(`Daarna: ${f.name.nl}`, `Then: ${f.name.en}`), dShortY(f.date, lang)]),
+              ...(v0 ? [[v0.bezig ? today : v0.p.van, `${VAK_NAAM[v0.vak][lang]} (${REGIO_NAAM[regio][lang]})`, v0.bezig ? T('nu bezig', 'now on') : dShortY(v0.p.van, lang)]] : []),
+            ].sort((a, b) => a[0].localeCompare(b[0])).map(([, k, w]) => [k, w] as [string, string]),
           ]} />
-          <p className="mt-2 text-xs text-navy-600">{T('Dit blok telt vanaf vandaag, los van het jaar van de pagina', 'This block counts from today, whatever year the page is about')}.</p>
           <ShareRow methodHref={methodHref} labels={ui} />
         </ResultCard>
       </div>

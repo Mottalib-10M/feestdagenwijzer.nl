@@ -21,6 +21,21 @@ interface Props { kind: string; lang: Lang; arg?: string; methodHref?: string; i
 /** Valeur lisible d'un champ (libellé de l'option choisie, ou nombre et unité). */
 const waarde = (i: Input, v: V): string => (i.kind === 'choice' ? i.options.find((o) => o.value === String(v[i.id]))?.label : i.kind === 'select' ? optsOf(i, v).find((o) => o.value === String(v[i.id]))?.label : `${v[i.id]}${i.unit ? `\u00a0${i.unit}` : ''}`) ?? String(v[i.id]);
 
+/** Werkdag-keuzes (Goede Vrijdag, 5 mei, 24 en 31 december) in gewone woorden; andere opties als « label: waarde ». */
+const DAG: Record<string, [string, string]> = { gv: ['Goede Vrijdag', 'Good Friday'], bd: ['5 mei', '5 May'], od: ['24 en 31 december', '24 and 31 December'] };
+const lijst = (xs: string[], en: string) => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${en} ${xs[xs.length - 1]}`);
+function actueel(adv: Input[], v: V, lang: Lang): string {
+  const L = lang === 'nl' ? 0 : 1, en = lang === 'nl' ? 'en' : 'and';
+  const dag = adv.filter((i) => DAG[i.id]), werk = dag.filter((i) => ['nee', 'werk'].includes(String(v[i.id])));
+  const vrij = dag.filter((i) => !werk.includes(i)), rest = adv.filter((i) => !DAG[i.id]);
+  const z: string[] = [];
+  if (werk.length) z.push(lang === 'nl' ? `Nu gerekend alsof u werkt op ${lijst(werk.map((i) => DAG[i.id][L]), en)}.` : `Now calculated as if you work on ${lijst(werk.map((i) => DAG[i.id][L]), en)}.`);
+  if (vrij.length) z.push(lang === 'nl' ? `Gerekend als vrij: ${lijst(vrij.map((i) => DAG[i.id][L]), en)}.` : `Counted as off: ${lijst(vrij.map((i) => DAG[i.id][L]), en)}.`);
+  if (rest.length) z.push(`${rest.map((i) => `${i.label.replace(/\?$/, '')}: ${waarde(i, v)}`).join(' · ')}.`);
+  z.push(werk.length ? (lang === 'nl' ? 'Bent u die dagen vrij? Tik hier.' : 'Off on those days? Tap here.') : (lang === 'nl' ? 'Tik om aan te passen.' : 'Tap to change.'));
+  return z.join(' ');
+}
+
 export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }: Props) {
   const ui = t(lang);
   const spec = useMemo(() => getTool(kind, lang, arg ? JSON.parse(arg) : undefined), [kind, lang, arg]);
@@ -63,7 +78,9 @@ export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }
               {/* Testeurs naïfs 2026-11-14 : « Meer opties » ne disait pas ce qu'il cachait ; le titre montre chaque réglage et sa valeur. */}
               <summary className="cursor-pointer text-sm font-medium text-navy-700">{ui.moreOptions}
                 {/* Tour 2 : « Goede Vrijdag vrij (cao): Nee » se lisait comme une réponse imposée ; on dit que c'est un choix modifiable. */}
-                <span data-actuellement className="mt-1 block text-xs font-normal text-navy-600">{lang === 'nl' ? 'Nu gerekend met: ' : 'Now calculated with: '}{adv.map((i) => `${i.label.replace(/\?$/, '')}: ${waarde(i, rv)}`).join(' · ')}{lang === 'nl' ? '. Tik om aan te passen.' : '. Tap to change.'}</span>
+                {/* Tour 3 (testeurs 1 et 3) : « Goede Vrijdag vrij (cao): Nee » se lisait encore comme un verdict ; la ligne dit
+                    sur quelle hypothèse on calcule (« alsof u werkt op … ») et comment la changer. */}
+                <span data-actuellement className="mt-1 block text-xs font-normal text-navy-600">{actueel(adv, rv, lang)}</span>
               </summary>
               <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">{adv.map(field)}</div>
             </details>

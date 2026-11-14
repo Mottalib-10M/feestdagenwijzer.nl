@@ -89,7 +89,10 @@ export const STATUS_TEKST: Record<Status, Tri> = {
   // fait le site (compté comme jour libre) et qui décide, sans inventer de « meestal ».
   // Tour 2 : « Als vrij gerekend; uw cao beslist » se lisait « on ne sait pas » (3 testeurs sur 3). Le libellé commence
   // maintenant par la réponse de la page (compté libre) ; toujours sans « meestal », que la source ne dit pas.
-  geen: N('Telt hier als vrij (uw cao beslist)', 'Counted as off here (your agreement decides)'),
+  // Tour 3 (testeurs 1 et 3, validé par l'éditeur) : « Telt hier als vrij (uw cao beslist) » n'était pas compris et
+  // passait d'un jour à l'autre selon l'année. Libellé simple et constant, le même que les autres jours fériés courants ;
+  // la réserve « uw cao beslist » reste dans le cadre « Gerekend als vrij » sous chaque résultat.
+  geen: N('Meestal vrij', 'Usually off'),
 };
 /**
  * Tekst voor de kolom « Vrij? » bij een datum. Een feestdag op zaterdag of zondag levert geen vrije werkdag op:
