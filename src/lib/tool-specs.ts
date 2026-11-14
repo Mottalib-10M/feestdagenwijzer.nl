@@ -35,6 +35,8 @@ export function periode(p: Periode, l: Lang): string {
   if (p.van.slice(5, 7) === p.tot.slice(5, 7)) return `${fmt(p.van, l, { day: 'numeric' })} – ${dLong(p.tot, l)}`;
   return `${dDay(p.van, l)} – ${dLong(p.tot, l)}`;
 }
+/** « 4 verlofdagen → 9 dagen vrij » (testeurs naïfs 2026-11-14 : « 4 → 9 » seul ne se lisait pas). */
+export const verlofNaarVrij = (verlof: number, vrij: number, l: Lang) => T(l, `${num(verlof, l)} verlofdag${verlof === 1 ? '' : 'en'} → ${num(vrij, l)} dagen vrij`, `${num(verlof, l)} leave day${verlof === 1 ? '' : 's'} → ${num(vrij, l)} days off`);
 export const dagenTxt = (x: number, l: Lang) => `${num(x, l)} ${x === 1 ? T(l, 'dag', 'day') : T(l, 'dagen', 'days')}`;
 const off = (iso: string, d: number) => toIso(fromIso(iso) + d);
 const sumA = (a: number[]) => a.reduce((x, z) => x + z, 0);
@@ -60,6 +62,17 @@ const statusTxt = (st: Status, l: Lang) => STATUS_TEKST[st][l];
 const schoolTxt = (iso: string, l: Lang) => { const rs = regiosMetVakantie(fromIso(iso)); return rs.length === 3 ? T(l, 'alle regio’s', 'all regions') : rs.length ? rs.map((r) => REGIO_KORT[r][l]).join(', ') : T(l, 'geen', 'none'); };
 
 /* ------------------------------------------------------------------ Feestdagen van een jaar */
+const lijstNl = (xs: string[], en = 'en') => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${en} ${xs[xs.length - 1]}`);
+const waarom = (id: string, l: Lang) => (id === 'goede-vrijdag' ? T(l, 'meestal een werkdag', 'usually a working day') : id === 'bevrijdingsdag' ? T(l, 'niet iedereen is dan vrij', 'not everyone is off') : '');
+/** De telling achter « X vrije dagen door de week », in woorden die optellen tot 11. */
+export function somZin(y: number, weekend: Array<{ id: string; name: { nl: string; en: string } }>, niet: Array<{ id: string; name: { nl: string; en: string } }>, vrij: number, l: Lang): string {
+  const nw = weekend.map((f) => f.name[l]), nn = niet.map((f) => `${f.name[l]} (${waarom(f.id, l)})`);
+  const w = weekend.length ? T(l, ` en ${num(weekend.length, l)} in ${y} in het weekend (${lijstNl(nw)})`, ` and ${num(weekend.length, l)} at the weekend in ${y} (${lijstNl(nw, 'and')})`) : '';
+  const n = niet.length ? T(l, ` Niet meegeteld: ${lijstNl(nn)}.`, ` Not counted: ${lijstNl(nn, 'and')}.`) : '';
+  return T(l, `Van de 11 officiële feestdagen vallen er 2 altijd op zondag${w}; een vervangende dag bestaat niet.${n} Blijven over: ${num(vrij, l)} vrije dagen door de week.`,
+    `Of the 11 official holidays, 2 are always Sundays${w}; there is no substitute day.${n} That leaves ${num(vrij, l)} weekday days off.`);
+}
+
 function ftSpec(l: Lang, a: Args = {}): ToolSpec {
   return {
     inputs: [fJaar(l, Number(a.jaar ?? 2027)), fProfiel(l, String(a.pf ?? 'bedrijf')), fGV(l), fBD(l)],
@@ -68,15 +81,18 @@ function ftSpec(l: Lang, a: Args = {}): ToolSpec {
       const list = officieel(y, o);
       const wk = list.filter((f) => f.vrij && !isWeekend(fromIso(f.date)));
       const weekend = list.filter((f) => !f.zondag && isWeekend(fromIso(f.date)));
+      const niet = list.filter((f) => !f.vrij && !f.zondag && !isWeekend(fromIso(f.date)));
       const bd = brugdagen(y, o);
       return {
         label: T(l, `Feestdagen ${y} in Nederland`, `Public holidays ${y} in the Netherlands`),
         value: T(l, `${num(wk.length, l)} vrije dagen door de week`, `${num(wk.length, l)} weekday days off`),
-        sub: T(l, `Van de 11 officiële feestdagen vallen er 2 altijd op zondag; ${num(weekend.length, l)} ${weekend.length === 1 ? 'valt' : 'vallen'} in ${y} in het weekend en ${weekend.length === 1 ? 'gaat' : 'gaan'} verloren, want Nederland kent geen vervangende vrije dag.`, `Of the 11 official holidays, 2 are always Sundays; ${num(weekend.length, l)} fall${weekend.length === 1 ? 's' : ''} at the weekend in ${y} and ${weekend.length === 1 ? 'is' : 'are'} lost, as the Netherlands has no substitute day off.`),
+        // Testeurs naïfs 2026-11-14 : « 11 − 2 − 2 » ne donnait pas 5 ; la phrase nomme maintenant chaque groupe,
+        // et la somme 2 + weekend + niet meegeteld + vrij fait toujours 11 (test dans tests/datums.test.ts).
+        sub: somZin(y, weekend, niet, wk.length, l),
         rows: [
           [T(l, 'Vrije feestdagen op een weekdag', 'Holidays off on a weekday'), num(wk.length, l)],
           [T(l, 'Feestdagen in het weekend (geen compensatie)', 'Holidays at the weekend (no compensation)'), num(weekend.length, l)],
-          [T(l, 'Echte brugdagen', 'True bridge days'), num(bd.length, l)],
+          [T(l, 'Brugdagen (1 werkdag tussen feestdag en weekend)', 'Bridge days (1 working day between a holiday and the weekend)'), num(bd.length, l)],
           [T(l, 'Werkdagen (ma–vr)', 'Working days (Mon–Fri)'), num(sumA(werkdagen(y, o)), l)],
         ],
         table: {
@@ -141,7 +157,7 @@ function btSpec(l: Lang, a: Args = {}): ToolSpec {
         label: T(l, `${y}: met ${num(p.verlof, l)} verlofdagen`, `${y}: using ${num(p.verlof, l)} leave days`),
         value: T(l, `${num(p.vrij, l)} dagen vrij`, `${num(p.vrij, l)} days off`),
         sub: p.verlof ? T(l, `Eén verlofdag levert gemiddeld ${formatDecimal(f, 1, l)} vrije dagen op een rij op.`, `One leave day buys on average ${formatDecimal(f, 1, l)} days off in a row.`) : T(l, 'Vul minstens één verlofdag in.', 'Enter at least one leave day.'),
-        rows: p.blokken.slice(0, 6).map((b) => [span(b.vrijVan, b.vrijTot, l), `${num(b.verlof, l)} → ${num(b.vrij, l)}`, b.vrij] as [string, string, number]),
+        rows: p.blokken.slice(0, 6).map((b) => [span(b.vrijVan, b.vrijTot, l), verlofNaarVrij(b.verlof, b.vrij, l), b.vrij] as [string, string, number]),
         table: p.blokken.length ? { caption: T(l, `Uw verlofplan ${y}: deze dagen aanvragen`, `Your ${y} leave plan: book these days`), headers: hd, rows: p.blokken.map(rij), align: ['l', 'r', 'l', 'r', 'l', 'l'] } : undefined,
         tables: all.length ? [{ caption: T(l, `Alle bruggen van ${y}, de beste eerst`, `Every bridge in ${y}, best first`), headers: hd, rows: all.map(rij), align: ['l', 'r', 'l', 'r', 'l', 'l'] }] : undefined,
         note: p.rest > 0 ? T(l, `${dagenTxt(p.rest, l)} verlengen geen brug meer en blijven vrij te plannen.`, `${dagenTxt(p.rest, l)} no longer lengthen any bridge and stay free to plan.`) : undefined,
@@ -243,6 +259,7 @@ function bvSpec(l: Lang, a: Args = {}): ToolSpec {
           rows: alle.map((f) => [f.name[l], dShort(f.date, l), statusTxt(VRIJ[f.id][pf], l)]),
           align: ['l', 'l', 'l'],
         },
+        aanname: T(l, `Voorbeeld voor: ${PROFIEL_NAAM[pf][l].toLowerCase()}, ${defOf(fid).name[l]} ${y}`, `Example for: ${PROFIEL_NAAM[pf][l].toLowerCase()}, ${defOf(fid).name[l]} ${y}`),
         note: T(l, 'Er is geen wet die een feestdag tot vrije dag maakt. Uw cao of arbeidsovereenkomst beslist; de Rijksoverheid beschrijft alleen wat gangbaar is.', 'No law turns a public holiday into a day off. Your collective agreement or contract decides; the government only describes what is usual.'),
       };
     },
@@ -257,7 +274,7 @@ function uitleg(st: Status, pf: Profiel, l: Lang): string {
     case 'vraag-na': return T(l, 'Officiële feestdag, maar niet iedereen is vrij: vraag het na bij uw werkgever of kijk in uw cao.', 'An official holiday, but not everyone is off: ask your employer or check your agreement.');
     case 'zondag': return T(l, 'Deze dag valt altijd op zondag; de vrije dag is de maandag erna.', 'This day is always a Sunday; the day off is the Monday after.');
     case 'vakantie': return T(l, 'Valt elk jaar in de kerstvakantie van alle drie de regio’s.', 'Falls in the Christmas break of all three regions every year.');
-    default: return T(l, 'De Rijksoverheid geeft hierover geen aparte toelichting; of u vrij bent, staat in uw cao of contract.', 'The government gives no separate guidance; whether you are off is in your agreement or contract.');
+    default: return T(l, 'Deze site rekent de dag als vrij. De Rijksoverheid geeft er geen aparte uitleg over; of u echt vrij bent, staat in uw cao of contract.', 'This site counts the day as a day off. The government gives no separate guidance on it; whether you are actually off is in your agreement or contract.');
   }
 }
 

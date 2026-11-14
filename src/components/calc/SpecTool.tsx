@@ -13,9 +13,13 @@ import { readParams, updateURL } from '../../lib/url-state';
 import { getTool } from '../../lib/tool-specs';
 import { optsOf, resolve, type Input, type V } from '../../lib/tool-types';
 import { t } from '../../i18n/ui';
+import { etiquettes, ficheTitre } from '../../lib/tableaux';
 import type { Lang } from '../../lib/format';
 
 interface Props { kind: string; lang: Lang; arg?: string; methodHref?: string; idPrefix?: string }
+
+/** Valeur lisible d'un champ (libellé de l'option choisie, ou nombre et unité). */
+const waarde = (i: Input, v: V): string => (i.kind === 'choice' ? i.options.find((o) => o.value === String(v[i.id]))?.label : i.kind === 'select' ? optsOf(i, v).find((o) => o.value === String(v[i.id]))?.label : `${v[i.id]}${i.unit ? `\u00a0${i.unit}` : ''}`) ?? String(v[i.id]);
 
 export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }: Props) {
   const ui = t(lang);
@@ -56,7 +60,10 @@ export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }
           {main.map(field)}
           {adv.length > 0 && (
             <details className="sm:col-span-2 rounded-lg border border-navy-200 px-3 py-2">
-              <summary className="cursor-pointer text-sm font-medium text-navy-700">{ui.moreOptions}</summary>
+              {/* Testeurs naïfs 2026-11-14 : « Meer opties » ne disait pas ce qu'il cachait ; le titre montre chaque réglage et sa valeur. */}
+              <summary className="cursor-pointer text-sm font-medium text-navy-700">{ui.moreOptions}
+                <span data-actuellement className="mt-1 block text-xs font-normal text-navy-600">{adv.map((i) => `${i.label.replace(/\?$/, '')}: ${waarde(i, rv)}`).join(' · ')}</span>
+              </summary>
               <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">{adv.map(field)}</div>
             </details>
           )}
@@ -68,15 +75,17 @@ export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }
           <ShareRow methodHref={methodHref} labels={ui} />
         </ResultCard>
       </div>
-      {[out.table, ...(out.tables ?? [])].filter((x) => !!x).map((tb, ti) => (
+      {/* Testeurs naïfs 2026-11-14 : ces tableaux (5 ou 6 colonnes) étaient coupés à droite sur téléphone, la colonne
+          « Vrij? » cachée. Comme les tableaux du contenu (lib/tableaux.ts), ils deviennent des fiches sous 768 px. */}
+      {[out.table, ...(out.tables ?? [])].filter((x) => !!x).map((tb, ti) => { const fiche = ficheTitre(tb!.headers, tb!.rows); return (
         <div key={ti} className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className={`w-full text-sm${tb!.headers.length >= 3 ? ' empile' : ''}`} data-titre={fiche.titre ? '2' : undefined}>
             {tb!.caption && <caption className="mb-2 text-left text-sm text-navy-700">{tb!.caption}</caption>}
             <thead><tr>{tb!.headers.map((h, i) => <th key={h + i} scope="col" className={`border-b border-navy-300 px-2 py-1.5 font-semibold text-navy-900 ${tb!.align?.[i] === 'r' ? 'text-right' : 'text-left'}`}>{h}</th>)}</tr></thead>
-            <tbody>{tb!.rows.map((r, k) => <tr key={k}>{r.map((c, i) => <td key={i} className={`tabular-nums border-b border-navy-100 px-2 py-1.5 text-navy-800 ${tb!.align?.[i] === 'r' ? 'text-right' : 'text-left'}`} dangerouslySetInnerHTML={{ __html: c }} />)}</tr>)}</tbody>
+            <tbody>{tb!.rows.map((r, k) => { const lab = etiquettes(tb!.headers, r.length, fiche); return <tr key={k}>{r.map((c, i) => <td key={i} data-label={lab[i] || undefined} className={`tabular-nums border-b border-navy-100 px-2 py-1.5 text-navy-800 ${tb!.align?.[i] === 'r' ? 'text-right' : 'text-left'}`} dangerouslySetInnerHTML={{ __html: c }} />)}</tr>; })}</tbody>
           </table>
         </div>
-      ))}
+      ); })}
     </div>
   );
 }

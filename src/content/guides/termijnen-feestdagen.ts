@@ -12,7 +12,7 @@ export default defineGuide({
   related: ['goede-vrijdag-2027', 'bevrijdingsdag-2027', 'werkdagen-2027', 'kalender-2027'],
   sources: ['termijnenwet', 'rijks-feestdagen', 'rijks-goede-vrijdag'],
   nl: {
-    slug: 'termijnen-en-feestdagen', nav: 'Termijn op een feestdag', card: 'Algemene termijnenwet: wanneer een termijn echt afloopt',
+    slug: 'termijnen-en-feestdagen', nav: 'Betaal- of bezwaartermijn op een feestdag', card: 'Algemene termijnenwet: wanneer een termijn echt afloopt',
     title: 'Termijn op een feestdag: wanneer loopt hij af? (2027)',
     description: "Termijn op een feestdag of in het weekend? De Algemene termijnenwet verlengt hem tot de eerstvolgende werkdag. Reken uit wanneer uw bezwaartermijn echt afloopt.",
     h1: 'Termijn op een feestdag: tot wanneer heeft u de tijd?',

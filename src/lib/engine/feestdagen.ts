@@ -61,7 +61,7 @@ export const PROFIEL_NAAM: Record<Profiel, Tri> = {
  *   vraag-na    « niet iedereen is dan vrij; vraag het na bij uw werkgever »
  *   zondag      de dag valt altijd op zondag
  *   vakantie    valt binnen de kerstvakantie van alle regio's
- *   geen        geen aparte toelichting van de Rijksoverheid
+ *   geen        geen aparte toelichting van de Rijksoverheid: de site rekent de dag als vrij, de cao beslist
  */
 export type Status = 'ja' | 'meestal' | 'werken' | 'vraag-na' | 'zondag' | 'vakantie' | 'geen';
 export const VRIJ: Record<FeestId, { bedrijf: Status; ambtenaar: Status; school: Status; bron?: string }> = {
@@ -82,9 +82,12 @@ export const STATUS_TEKST: Record<Status, Tri> = {
   meestal: N('Meestal vrij', 'Usually off'),
   werken: N('Meestal werken', 'Usually a working day'),
   'vraag-na': N('Hangt van uw cao af', 'Depends on your agreement'),
-  zondag: N('Zondag', 'Sunday'),
+  zondag: N('Valt altijd op zondag', 'Always a Sunday'),
   vakantie: N('Kerstvakantie', 'Christmas break'),
-  geen: N('Geen toelichting van de Rijksoverheid', 'No separate government guidance'),
+  // Testeurs naïfs 2026-11-14 : « Geen toelichting van de Rijksoverheid » se lisait « on ne sait pas si l'on est
+  // libre à Noël », alors que la page compte ces jours comme vrij. La source ne dit rien de plus : on dit ce que
+  // fait le site (compté comme jour libre) et qui décide, sans inventer de « meestal ».
+  geen: N('Als vrij gerekend; uw cao beslist', 'Counted as a day off; your agreement decides'),
 };
 
 /* ------------------------------------------------------------------ Opties voor de rekenaars */

@@ -14,7 +14,7 @@ import { optimaliseer, brugdagen, werkdagen } from './engine/bruggen';
 import { kalender, SCHOOLJAREN, REGIOS, REGIO_NAAM, VAKS, VAK_NAAM, dagen, sj, type Regio, type Vak } from './engine/school';
 import { FEESTDAGEN, PROFIELEN, PROFIEL_NAAM, VRIJ, STATUS_TEKST, datum, type Profiel } from './engine/feestdagen';
 import { verleng } from './engine/termijnen';
-import { JAREN, span, dWeek, dShort, periode, T, dagenTxt } from './tool-specs';
+import { JAREN, MAANDEN, span, dWeek, dShort, periode, T, dagenTxt, verlofNaarVrij } from './tool-specs';
 
 const L = (l: string): Lang => (l === 'nl' ? 'nl' : 'en');
 const jaarIn = (l: Lang, def = 2027): MiniInput => ({ id: 'jaar', label: T(l, 'Jaar', 'Year'), def, options: JAREN.map((y) => ({ value: String(y), label: String(y) })) });
@@ -27,9 +27,22 @@ export function getSpec(kind: string, lang = 'nl'): MiniSpec {
       cta: T(l, 'Naar de brugdagenplanner', 'Open the bridge-day planner'),
       exemple: (v) => T(l, `Voorbeeld met ${formatNumber(v.verlof, 0, l)} verlofdagen in ${v.jaar}`, `Example with ${formatNumber(v.verlof, 0, l)} leave days in ${v.jaar}`),
       inputs: [{ id: 'verlof', label: T(l, 'Verlofdagen', 'Leave days'), def: 5, unit: T(l, 'dagen', 'days'), max: 40 }, jaarIn(l)],
+      // Testeurs naïfs 2026-11-14 : « Verlofdagen gebruikt 2 » pour 3 saisis, et un seul « Beste blok » qui ne
+      // faisait pas le total (8 jours annoncés, bloc de 4) : chaque blok est listé, et le jour qui ne rapporte rien est dit.
       run: (v) => {
-        const p = optimaliseer(v.jaar, Math.round(v.verlof)), bd = brugdagen(v.jaar);
-        return { head: [T(l, `${v.jaar}: vrij op een rij`, `${v.jaar}: days off in a row`), dagenTxt(p.vrij, l)], rows: [[T(l, 'Verlofdagen gebruikt', 'Leave days used'), formatNumber(p.verlof, 0, l)], [T(l, 'Rendement per verlofdag', 'Return per leave day'), p.verlof ? formatDecimal(p.vrij / p.verlof, 1, l) : '–'], [T(l, 'Echte brugdagen dit jaar', 'True bridge days this year'), formatNumber(bd.length, 0, l)], ...(p.blokken[0] ? [[T(l, 'Beste blok', 'Best block'), span(p.blokken[0].vrijVan, p.blokken[0].vrijTot, l)] as [string, string]] : [])], note: T(l, 'Zonder Goede Vrijdag en 5 mei als vrije dag; zet ze aan in de planner als uw cao ze geeft.', 'Without Good Friday and 5 May as days off; switch them on in the planner if your agreement grants them.') };
+        const gevraagd = Math.round(v.verlof), p = optimaliseer(v.jaar, gevraagd), bd = brugdagen(v.jaar);
+        const blokken = p.blokken.map((b) => [span(b.vrijVan, b.vrijTot, l), verlofNaarVrij(b.verlof, b.vrij, l)] as [string, string]);
+        const rest = gevraagd - p.verlof;
+        return {
+          head: [T(l, `${v.jaar}: vrije dagen op een rij`, `${v.jaar}: days off in a row`), dagenTxt(p.vrij, l)],
+          alert: rest > 0 && p.verlof > 0 ? T(l, `U zet ${formatNumber(p.verlof, 0, l)} van uw ${formatNumber(gevraagd, 0, l)} verlofdagen in. ${rest === 1 ? 'De laatste levert' : `De laatste ${formatNumber(rest, 0, l)} leveren`} in ${v.jaar} geen extra blok vrije dagen op; die plant u waar u wilt.`, `You use ${formatNumber(p.verlof, 0, l)} of your ${formatNumber(gevraagd, 0, l)} leave days. ${rest === 1 ? 'The last one adds' : `The last ${formatNumber(rest, 0, l)} add`} no extra block of days off in ${v.jaar}; plan ${rest === 1 ? 'it' : 'them'} wherever you like.`) : undefined,
+          rows: [
+            ...blokken,
+            [T(l, 'Elke verlofdag levert gemiddeld', 'Each leave day gives on average'), p.verlof ? T(l, `${formatDecimal(p.vrij / p.verlof, 1, l)} vrije dagen op`, `${formatDecimal(p.vrij / p.verlof, 1, l)} days off`) : '–'],
+            [T(l, 'Brugdagen dit jaar (1 werkdag tussen feestdag en weekend)', 'Bridge days this year (1 working day between a holiday and the weekend)'), formatNumber(bd.length, 0, l)],
+          ],
+          note: T(l, 'Goede Vrijdag en 5 mei tellen hier als werkdag. Geeft uw cao ze vrij? Zet ze dan aan onder ‘Meer opties’ in de brugdagenplanner.', 'Good Friday and 5 May count as working days here. Does your agreement give them off? Switch them on under “More options” in the bridge-day planner.'),
+        };
       },
     };
     case 'werk': return {
@@ -39,8 +52,8 @@ export function getSpec(kind: string, lang = 'nl'): MiniSpec {
       inputs: [jaarIn(l), { id: 'week', label: T(l, 'Werkdagen per week', 'Working days per week'), def: 5, options: [{ value: '5', label: '5' }, { value: '4', label: '4' }, { value: '3', label: '3' }] }],
       run: (v) => {
         const m = werkdagen(v.jaar), sum = m.reduce((a, b) => a + b, 0), eigen = Math.round((sum * v.week) / 5);
-        const min = Math.min(...m), max = Math.max(...m);
-        return { head: [T(l, `Werkdagen ${v.jaar}`, `Working days ${v.jaar}`), formatNumber(eigen, 0, l)], rows: [[T(l, 'Bij 5 dagen per week', 'At 5 days a week'), formatNumber(sum, 0, l)], [T(l, 'Kortste maand', 'Shortest month'), formatNumber(min, 0, l)], [T(l, 'Langste maand', 'Longest month'), formatNumber(max, 0, l)]] };
+        const min = Math.min(...m), max = Math.max(...m), mnd = (x: number) => MAANDEN(l)[m.indexOf(x)];
+        return { head: [T(l, `Werkdagen ${v.jaar}`, `Working days ${v.jaar}`), formatNumber(eigen, 0, l)], rows: [[T(l, 'Bij 5 dagen per week', 'At 5 days a week'), formatNumber(sum, 0, l)], [T(l, `Minste werkdagen: ${mnd(min)}`, `Fewest working days: ${mnd(min)}`), formatNumber(min, 0, l)], [T(l, `Meeste werkdagen: ${mnd(max)}`, `Most working days: ${mnd(max)}`), formatNumber(max, 0, l)]] };
       },
     };
     case 'school': return {
@@ -68,7 +81,7 @@ export function getSpec(kind: string, lang = 'nl'): MiniSpec {
       ],
       run: (v) => {
         const pf = PROFIELEN[v.pf] as Profiel, f = FEESTDAGEN[v.fd], d = datum(f.id, v.jaar), st = VRIJ[f.id][pf];
-        return { head: [`${f.name[l]} ${v.jaar}`, STATUS_TEKST[st][l]], rows: [[T(l, 'Datum', 'Date'), dWeek(d, l)], ...PROFIELEN.filter((p) => p !== pf).map((p) => [PROFIEL_NAAM[p][l], STATUS_TEKST[VRIJ[f.id][p]][l]] as [string, string])], note: T(l, 'Volgens de vraag-en-antwoordpagina’s van de Rijksoverheid; uw cao beslist.', 'According to the government’s question-and-answer pages; your agreement decides.') };
+        return { head: [`${f.name[l]} ${v.jaar}`, STATUS_TEKST[st][l]], rows: [[T(l, 'Datum', 'Date'), dWeek(d, l)], ...PROFIELEN.map((p) => [PROFIEL_NAAM[p][l], STATUS_TEKST[VRIJ[f.id][p]][l]] as [string, string])], note: T(l, 'Volgens de vraag-en-antwoordpagina’s van de Rijksoverheid; uw cao beslist.', 'According to the government’s question-and-answer pages; your agreement decides.') };
       },
     };
     case 'termijn': return {

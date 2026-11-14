@@ -30,7 +30,7 @@ export default defineGuide({
 ${h.table(['Jaar', 'Datum', 'Weekdag'], jaren.map((y) => [String(y), h.day(F('bevrijdingsdag', y)), h.wd(F('bevrijdingsdag', y))]), 'Bevrijdingsdag per jaar', ['l', 'l', 'l'])}
 <h2>Verlof plannen met of zonder 5 mei</h2>
 <p>Zonder 5 mei zijn er twee losse bruggen: maandag voor Koningsdag (${h.day(kd)}) en vrijdag na Hemelvaart. Met 5 mei vrij liggen er tussen Koningsdag en Hemelvaart nog maar een paar werkdagen; dat maakt één lang blok mogelijk.</p>
-${h.mini('brug', { t: 'Verlof in mei 2027', d: { verlof: 3, jaar: 2027 }, e: 'Voorbeeld met 3 verlofdagen, 5 mei als werkdag' })}
+${h.mini('brug', { t: 'Verlof rond Koningsdag en Hemelvaart 2027', d: { verlof: 2, jaar: 2027 }, e: 'Voorbeeld met 2 verlofdagen, 5 mei als werkdag' })}
 <p>In de ${h.a('brugdagen-2027', 'brugdagenplanner')} zet u 5 mei aan of uit en ziet u het verschil meteen.</p>`,
   },
   en: {
@@ -51,7 +51,7 @@ ${h.mini('brug', { t: 'Verlof in mei 2027', d: { verlof: 3, jaar: 2027 }, e: 'Vo
 ${h.table(['Year', 'Date', 'Weekday'], jaren.map((y) => [String(y), h.day(F('bevrijdingsdag', y)), h.wd(F('bevrijdingsdag', y))]), 'Liberation Day by year', ['l', 'l', 'l'])}
 <h2>Planning leave with or without 5 May</h2>
 <p>Without 5 May there are two separate bridges: the Monday before King's Day (${h.day(kd)}) and the Friday after Ascension. With 5 May off, only a few working days remain between King's Day and Ascension, which makes one long block possible.</p>
-${h.mini('brug', { t: 'Leave in May 2027', d: { verlof: 3, jaar: 2027 }, e: 'Example with 3 leave days, 5 May as a working day' })}
+${h.mini('brug', { t: "Leave around King's Day and Ascension 2027", d: { verlof: 2, jaar: 2027 }, e: 'Example with 2 leave days, 5 May as a working day' })}
 <p>In the ${h.a('brugdagen-2027', 'bridge-day planner')} you switch 5 May on or off and see the difference at once.</p>`,
   },
 });

@@ -49,14 +49,14 @@ export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a' }
         <form data-simulateur className="grid content-start grid-cols-1 gap-x-4 gap-y-3" onSubmit={(e) => e.preventDefault()}>
           <SelectField id={`${idPrefix}-regio`} label={T('Regio voor de schoolvakantie', 'Region for school holidays')} value={regio} onChange={(v) => { setRegio(v as Regio); setMoved(true); }} options={REGIOS.map((g) => ({ value: g, label: REGIO_NAAM[g][lang] }))} />
           <div className="rounded-lg border border-accent-200 bg-accent-50 px-4 py-3" data-chrome>
-            <p className="text-sm font-medium text-navy-700">{vandaag ? T(`Vandaag is het ${next.name.nl}`, `Today is ${next.name.en}`) : T(`Nog tot ${next.name.nl}`, `Time left until ${next.name.en}`)}</p>
+            <p className="text-sm font-medium text-navy-700">{vandaag ? T(`Vandaag is het ${next.name.nl}`, `Today is ${next.name.en}`) : T(`Vanaf vandaag nog tot ${next.name.nl} ${next.date.slice(0, 4)}`, `From today until ${next.name.en} ${next.date.slice(0, 4)}`)}</p>
             {!vandaag && <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1" aria-live="off">
               {[[d, ui.days], [h, ui.hours], [m, ui.minutes], [s, ui.seconds]].map(([v, u]) => <span key={String(u)} className="inline-flex items-baseline gap-1"><span className="tabular-nums text-2xl font-bold text-navy-900">{nf.format(Number(v))}</span><span className="text-sm text-navy-600">{u}</span></span>)}
             </p>}
             <p className="mt-1 text-xs text-navy-600">{T('Geteld tot middernacht in Nederland, met de klok van uw toestel.', 'Counted to midnight in the Netherlands, using your device clock.')}</p>
           </div>
         </form>
-        <ResultCard label={T('Volgende officiële feestdag', 'Next official public holiday')} value={next.name[lang]} sub={dWeek(next.date, lang)}>
+        <ResultCard label={T('Eerstvolgende feestdag vanaf vandaag', 'Next public holiday from today')} value={next.name[lang]} sub={dWeek(next.date, lang)}>
           <Rows rows={[
             [T('Vrij voor werknemers?', 'Day off for employees?'), isWeekend(fromIso(next.date)) ? T('Valt in het weekend', 'Falls on a weekend') : status],
             ...lijst.slice(1, 4).map((f) => [f.name[lang], dShort(f.date, lang)] as [string, string]),

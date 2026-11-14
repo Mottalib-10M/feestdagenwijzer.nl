@@ -8,7 +8,7 @@ const meestal = K.FEESTDAGEN.filter((f) => K.VRIJ[f.id].bedrijf === 'meestal').l
 const wk = K.officieel(Y).filter((f) => !K.isWeekend(K.fromIso(f.date))).length;
 
 export default defineGuide({
-  id: 'ben-ik-vrij', group: 'verlof', order: 13, tool: 'bv', toolArg: { fd: 'tweede-pinksterdag', jaar: Y },
+  id: 'ben-ik-vrij', group: 'verlof', order: 13, tool: 'bv', toolArg: { fd: 'koningsdag', jaar: Y },
   related: ['goede-vrijdag-2027', 'bevrijdingsdag-2027', 'werkdagen-2027', 'brugdagen-2027'],
   sources: ['rijks-cao', 'rijks-goede-vrijdag', 'rijks-tweede-paasdag', 'rijks-koningsdag', 'rijks-bevrijdingsdag', 'rijks-hemelvaart', 'rijks-tweede-pinksterdag'],
   nl: {
@@ -28,7 +28,7 @@ ${h.table(['Feestdag', 'Datum 2027', 'Werknemer', 'Ambtenaar', 'Scholier'], ids.
 <p>Elke regel volgt de vraag-en-antwoordpagina van de Rijksoverheid voor die dag, bijvoorbeeld over ${h.src('rijks-hemelvaart', 'Hemelvaartsdag')} of ${h.src('rijks-bevrijdingsdag', 'Bevrijdingsdag')}. Voor ambtenaren noemt de Rijksoverheid mogelijke uitzonderingen bij politie, defensie en academische ziekenhuizen.</p>
 <h2>Waar u het zeker weet</h2>
 <p>Zoek uw cao op, of vraag uw werkgever welke cao geldt. Daarin staat een lijst met erkende feestdagen en, in sectoren met roosters, de toeslag voor werken op die dagen. De ${h.src('rijks-cao', 'Rijksoverheid legt uit')} wat een cao is en voor wie hij geldt.</p>
-${h.mini('vrij', { t: 'Ben ik vrij? Kies uw situatie en de feestdag', d: { pf: 0, fd: 4 }, e: 'Voorbeeld: Koningsdag voor een werknemer bij een bedrijf' })}
+${h.mini('werk', { t: 'Hoeveel werkdagen houdt u over in 2027?', d: { jaar: 2027, week: 5 }, e: 'Voorbeeld voor 2027 bij 5 dagen per week' })}
 <p>Een feestdag die in het weekend valt, wordt in Nederland niet gecompenseerd. Hoeveel werkdagen u overhoudt, ziet u op ${h.a('werkdagen-2027', 'werkdagen 2027')}.</p>`,
   },
   en: {
@@ -48,7 +48,7 @@ ${h.table(['Holiday', 'Date 2027', 'Employee', 'Civil servant', 'Pupil'], ids.ma
 <p>Each row follows the government Q&amp;A page for that day, for example on ${h.src('rijks-hemelvaart', 'Ascension Day')} or ${h.src('rijks-bevrijdingsdag', 'Liberation Day')}. For civil servants the government mentions possible exceptions in the police, defence and academic hospitals.</p>
 <h2>Where to be sure</h2>
 <p>Look up your agreement, or ask your employer which one applies. It lists the recognised holidays and, in rostered sectors, the premium for working them. The ${h.src('rijks-cao', 'government explains')} what a cao is and whom it covers.</p>
-${h.mini('vrij', { t: 'Am I off? Pick your situation and the holiday', d: { pf: 0, fd: 4 }, e: "Example: King's Day for an employee at a company" })}
+${h.mini('werk', { t: 'How many working days do you have left in 2027?', d: { jaar: 2027, week: 5 }, e: 'Example for 2027 at 5 days a week' })}
 <p>A holiday at the weekend is not compensated in the Netherlands. How many working days remain is on ${h.a('werkdagen-2027', 'working days 2027')}.</p>`,
   },
 });
