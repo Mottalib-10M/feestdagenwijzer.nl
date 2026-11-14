@@ -2,6 +2,7 @@
 import { defineGuide } from '../../lib/page-types';
 import { K, D, DW, WD, SPAN, PER, N, F, OPT, BD, SV } from '../_k';
 import type { Lang } from '../../lib/format';
+import { verlofNaarVrij } from '../../lib/tool-specs';
 
 const Y = 2027;
 const bd = BD(Y), alle = K.bruggen(Y);
@@ -18,7 +19,7 @@ export default defineGuide({
   related: ['werkdagen-2027', 'hemelvaart-2027', 'koningsdag-2027', 'brugdagen-2028'],
   sources: ['rijks-feestdagen', 'rijks-koningsdag', 'rijks-hemelvaart', 'rijks-sv-2026'],
   nl: {
-    slug: 'brugdagen-2027', nav: 'Brugdagen 2027', card: `${N(bd.length, 'nl')} echte brugdagen; 5 verlofdagen = ${N(p5.vrij, 'nl')} dagen vrij`,
+    slug: 'brugdagen-2027', nav: 'Brugdagen 2027', card: `${N(bd.length, 'nl')} brugdagen; 5 verlofdagen = ${N(p5.vrij, 'nl')} dagen vrij`,
     title: 'Brugdagen 2027: verlofplanner met de beste vrije dagen',
     description: `Brugdagen 2027 in Nederland: ${WD(bd[0].verlofVan, 'nl')} ${D(bd[0].verlofVan, 'nl')} en ${WD(bd[1].verlofVan, 'nl')} ${D(bd[1].verlofVan, 'nl')}. De planner legt uw verlofdagen zo dat u de meeste dagen achter elkaar vrij bent.`,
     h1: 'Brugdagen 2027: meer vrij met minder verlof',
@@ -33,7 +34,7 @@ export default defineGuide({
 ${h.table(['Verlof nemen', 'Verlofdagen', 'Vrij op een rij', 'Vrije dagen'], rij('nl', p10), `Tien verlofdagen in ${Y}: ${N(p10.vrij, 'nl')} dagen vrij`, ['l', 'r', 'l', 'r'])}
 <p>De planner vergelijkt alle combinaties en kiest de verdeling met de meeste vrije dagen, niet alleen de bruggen met het beste rendement. Daarom staan er ook blokken van vier verlofdagen in: na Pasen, van ${h.day(paas.verlofVan)} tot ${h.day(paas.verlofTot)}, geeft dat ${N(paas.vrij, 'nl')} dagen vrij; na Pinksteren, van ${h.day(pink.verlofVan)} tot ${h.day(pink.verlofTot)}, ook ${N(pink.vrij, 'nl')}.</p>
 <h2>Mei 2027: drie feestdagen, twee bruggen</h2>
-<p>Koningsdag op ${h.wd(kd)}, Bevrijdingsdag op ${h.wd(bv)} en Hemelvaart op ${h.wd(hv)} liggen binnen tien dagen. Voor wie 5 mei moet werken, zijn er twee losse bruggen. Wie 5 mei vrij heeft, vult met ${N(metBd.verlof, 'nl')} verlofdagen veel meer: ${N(metBd.vrij, 'nl')} vrije dagen. Of 5 mei vrij is, ${h.src('rijks-bevrijdingsdag', 'hangt volgens de Rijksoverheid af van uw cao')}.</p>
+<p>Koningsdag op ${h.wd(kd)}, Bevrijdingsdag op ${h.wd(bv)} en Hemelvaart op ${h.wd(hv)} liggen binnen tien dagen. Voor wie 5 mei moet werken, zijn er twee losse bruggen. Wie 5 mei vrij heeft, vult met ${N(metBd.verlof, 'nl')} verlofdagen veel meer: ${N(metBd.vrij, 'nl')} vrije dagen, namelijk ${metBd.blokken.map((b) => `${SPAN(b.vrijVan, b.vrijTot, 'nl')} (${verlofNaarVrij(b.verlof, b.vrij, 'nl')})`).join(' en ')}. Of 5 mei vrij is, ${h.src('rijks-bevrijdingsdag', 'hangt volgens de Rijksoverheid af van uw cao')}.</p>
 ${h.mini('vrij', { t: 'Is 5 mei 2027 vrij in uw situatie?', d: { pf: 0, fd: 5 }, e: 'Voorbeeld voor een werknemer bij een bedrijf' })}
 <h2>Rekening houden met de meivakantie</h2>
 <p>De meivakantie van ${h.per(mei)} geldt in Noord, Midden en Zuid tegelijk. Ouders die de week ervoor of erna vrij nemen, zitten dus nooit verkeerd per regio. De brug van ${h.day(bd[0].verlofVan)} valt al in de schoolvakantie; die van ${h.day(bd[1].verlofVan)} niet, al geven veel scholen die vrijdag vrij. Meer per regio op ${h.a('schoolvakanties-2026-2027', 'schoolvakanties 2026-2027')}.</p>`,
@@ -54,7 +55,7 @@ ${h.mini('vrij', { t: 'Is 5 mei 2027 vrij in uw situatie?', d: { pf: 0, fd: 5 },
 ${h.table(['Take leave', 'Leave days', 'Off in a row', 'Days off'], rij('en', p10), `Ten leave days in ${Y}: ${N(p10.vrij, 'en')} days off`, ['l', 'r', 'l', 'r'])}
 <p>The planner compares every combination and picks the split with the most days off, not just the bridges with the best return. That is why four-day blocks appear too: after Easter, ${h.day(paas.verlofVan)} to ${h.day(paas.verlofTot)}, gives ${N(paas.vrij, 'en')} days off; after Whitsun, ${h.day(pink.verlofVan)} to ${h.day(pink.verlofTot)}, also ${N(pink.vrij, 'en')}.</p>
 <h2>May 2027: three holidays, two bridges</h2>
-<p>King's Day on a ${h.wd(kd)}, Liberation Day on a ${h.wd(bv)} and Ascension on a ${h.wd(hv)} fall within ten days. If you work on 5 May, there are two separate bridges. If 5 May is off, ${N(metBd.verlof, 'en')} leave days fill far more: ${N(metBd.vrij, 'en')} days off. Whether 5 May is off ${h.src('rijks-bevrijdingsdag', 'depends on your agreement, says the government')}.</p>
+<p>King's Day on a ${h.wd(kd)}, Liberation Day on a ${h.wd(bv)} and Ascension on a ${h.wd(hv)} fall within ten days. If you work on 5 May, there are two separate bridges. If 5 May is off, ${N(metBd.verlof, 'en')} leave days fill far more: ${N(metBd.vrij, 'en')} days off, namely ${metBd.blokken.map((b) => `${SPAN(b.vrijVan, b.vrijTot, 'en')} (${verlofNaarVrij(b.verlof, b.vrij, 'en')})`).join(' and ')}. Whether 5 May is off ${h.src('rijks-bevrijdingsdag', 'depends on your agreement, says the government')}.</p>
 ${h.mini('vrij', { t: 'Is 5 May 2027 a day off for you?', d: { pf: 0, fd: 5 }, e: 'Example for an employee at a company' })}
 <h2>Planning around the May school break</h2>
 <p>The May break of ${h.per(mei)} applies in North, Central and South at once, so parents taking the week before or after are never out of step by region. The ${h.day(bd[0].verlofVan)} bridge already falls inside the school break; the ${h.day(bd[1].verlofVan)} one does not, though many schools close that Friday. More by region on ${h.a('schoolvakanties-2026-2027', 'school holidays 2026-2027')}.</p>`,

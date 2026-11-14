@@ -6,7 +6,7 @@
 import type { ToolSpec, V, ToolOut, Opt } from './tool-types';
 import { resolve } from './tool-types';
 import { formatNumber, formatDecimal, TAG, type Lang } from './format';
-import { officieel, vrijeDagen, datum, defOf, isVrij, VRIJ, STATUS_TEKST, PROFIELEN, PROFIEL_NAAM, FEESTDAGEN, optiesVoor, volgende, type FeestId, type Profiel, type Opties, type Status } from './engine/feestdagen';
+import { officieel, vrijeDagen, datum, defOf, isVrij, VRIJ, STATUS_TEKST, vrijOpDatum, PROFIELEN, PROFIEL_NAAM, FEESTDAGEN, optiesVoor, volgende, type FeestId, type Profiel, type Opties, type Status } from './engine/feestdagen';
 import { optimaliseer, bruggen, brugdagen, werkdagen, weekdagen, werkdagenTussen } from './engine/bruggen';
 import { kalender, SCHOOLJAREN, REGIOS, REGIO_KORT, REGIO_NAAM, VAKS, VAK_NAAM, ADVIES, dagen, weekdagenIn, volgendeVakantie, regiosMetVakantie, zelfdeOveral, PROVINCIE_NAMEN, keuzes, regioVan, sj, type Regio, type Vak, type Periode } from './engine/school';
 import { verleng } from './engine/termijnen';
@@ -24,10 +24,14 @@ export const dLong = (iso: string, l: Lang) => fmt(iso, l, { day: 'numeric', mon
 export const dWeek = (iso: string, l: Lang) => fmt(iso, l, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 /** « do 6 mei » */
 export const dShort = (iso: string, l: Lang) => fmt(iso, l, { weekday: 'short', day: 'numeric', month: 'long' }).replace('.', '');
+/** « do 6 mei 2027 » : korte datum met jaar, voor lijsten die over de jaargrens gaan (testeurs naïfs 2026-11-14, tour 2). */
+export const dShortY = (iso: string, l: Lang) => fmt(iso, l, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }).replace('.', '');
 /** « 6 mei » */
 export const dDay = (iso: string, l: Lang) => fmt(iso, l, { day: 'numeric', month: 'long' });
 export const wdLong = (iso: string, l: Lang) => fmt(iso, l, { weekday: 'long' });
-export const span = (a: string, b: string, l: Lang) => (a === b ? dShort(a, l) : `${dShort(a, l)} – ${dShort(b, l)}`);
+// Testeurs naïfs 2026-11-14 (tour 2) : « za 23 december – ma 1 januari » sans année, le 1er janvier étant en 2029.
+// Une période qui passe la jaargrens porte l'année aux deux bouts.
+export const span = (a: string, b: string, l: Lang) => (a === b ? dShort(a, l) : a.slice(0, 4) !== b.slice(0, 4) ? `${dShortY(a, l)} – ${dShortY(b, l)}` : `${dShort(a, l)} – ${dShort(b, l)}`);
 /** « 24 april – 2 mei 2027 » of « 19 december 2026 – 3 januari 2027 » */
 export function periode(p: Periode, l: Lang): string {
   const [ya, yb] = [p.van.slice(0, 4), p.tot.slice(0, 4)];
@@ -41,6 +45,8 @@ export const dagenTxt = (x: number, l: Lang) => `${num(x, l)} ${x === 1 ? T(l, '
 const off = (iso: string, d: number) => toIso(fromIso(iso) + d);
 const sumA = (a: number[]) => a.reduce((x, z) => x + z, 0);
 export const JAREN = [2026, 2027, 2028, 2029, 2030];
+/** Het criterium van bruggen() (engine/bruggen.ts), overal met dezelfde woorden genoemd. */
+export const RANG = { nl: 'gerangschikt op: vrije dagen per verlofdag', en: 'ranked by: days off per leave day' };
 export const MAANDEN = (l: Lang) => Array.from({ length: 12 }, (_, i) => new Date(Date.UTC(2027, i, 15)).toLocaleDateString(TAG(l), { month: 'long', timeZone: 'UTC' }));
 
 /* ------------------------------------------------------------------ Velden */
@@ -50,12 +56,12 @@ const fProfiel = (l: Lang, def = 'bedrijf', adv = false) => ({ kind: 'select' as
 const fGV = (l: Lang, def = 'nee') => ({ kind: 'choice' as const, id: 'gv', label: T(l, 'Goede Vrijdag vrij (cao)?', 'Good Friday off (your agreement)?'), def, adv: true, options: [{ value: 'nee', label: T(l, 'Nee', 'No') }, { value: 'ja', label: T(l, 'Ja', 'Yes') }], help: T(l, 'Rijksoverheid: bij de meeste bedrijven een werkdag.', 'Government: a working day at most companies.') });
 const fBD = (l: Lang, def = 'nee') => ({ kind: 'choice' as const, id: 'bd', label: T(l, '5 mei vrij (cao)?', '5 May off (your agreement)?'), def, adv: true, options: [{ value: 'nee', label: T(l, 'Nee', 'No') }, { value: 'ja', label: T(l, 'Ja', 'Yes') }], help: T(l, 'Rijksoverheid: niet iedereen is dan vrij.', 'Government: not everyone has the day off.') });
 const fOud = (l: Lang) => ({ kind: 'choice' as const, id: 'od', label: T(l, '24 en 31 december', '24 and 31 December'), def: 'werk', adv: true, options: [{ value: 'werk', label: T(l, 'Werkdagen', 'Working days') }, { value: 'vrij', label: T(l, 'Vrij', 'Days off') }] });
-const fRegio = (l: Lang, def = 'midden', adv = false, id = 'regio') => ({ kind: 'select' as const, id, label: T(l, 'Schoolvakantieregio', 'School-holiday region'), def, adv, options: REGIOS.map((r) => ({ value: r, label: REGIO_NAAM[r][l] })) });
+const fRegio = (l: Lang, def = 'midden', adv = false, id = 'regio', help?: string) => ({ kind: 'select' as const, id, label: T(l, 'Schoolvakantieregio', 'School-holiday region'), def, adv, help, options: REGIOS.map((r) => ({ value: r, label: REGIO_NAAM[r][l] })) });
 const fSj = (l: Lang, def = 2026) => ({ kind: 'select' as const, id: 'sj', label: T(l, 'Schooljaar', 'School year'), def: String(def), options: SCHOOLJAREN.map((y) => ({ value: String(y), label: sj(y) })) });
 const fFeest = (l: Lang, def: FeestId = 'hemelvaartsdag') => ({ kind: 'select' as const, id: 'fd', label: T(l, 'Feestdag', 'Public holiday'), def, options: FEESTDAGEN.map((f) => ({ value: f.id, label: f.name[l] })) });
 const opts = (v: V, pf?: Profiel): Opties => { const base = pf ? optiesVoor(pf) : { goedeVrijdag: false, bevrijdingsdag: false, oudejaar: false }; return { goedeVrijdag: v.gv === undefined ? base.goedeVrijdag : s(v, 'gv') === 'ja', bevrijdingsdag: v.bd === undefined ? base.bevrijdingsdag : s(v, 'bd') === 'ja', oudejaar: s(v, 'od') === 'vrij' }; };
 const aanname = (o: Opties, l: Lang) => T(l,
-  `Als vrij gerekend: Nieuwjaarsdag, Tweede Paasdag, Koningsdag, Hemelvaartsdag, Tweede Pinksterdag en beide Kerstdagen${o.goedeVrijdag ? ', Goede Vrijdag' : ''}${o.bevrijdingsdag ? ', Bevrijdingsdag' : ''}${o.oudejaar ? ', 24 en 31 december' : ''}. Of u echt vrij bent, staat in uw cao of contract.`,
+  `Als vrij gerekend: Nieuwjaarsdag, Tweede Paasdag, Koningsdag, Hemelvaartsdag, Tweede Pinksterdag en beide Kerstdagen${o.goedeVrijdag ? ', Goede Vrijdag' : ''}${o.bevrijdingsdag ? ', Bevrijdingsdag' : ''}${o.oudejaar ? ', 24 en 31 december' : ''}. Of u echt vrij bent, staat in uw cao (collectieve arbeidsovereenkomst: de afspraken over loon en vrije dagen in uw sector) of in uw contract.`,
   `Counted as days off: New Year's Day, Easter Monday, King's Day, Ascension Day, Whit Monday and both Christmas days${o.goedeVrijdag ? ', Good Friday' : ''}${o.bevrijdingsdag ? ', Liberation Day' : ''}${o.oudejaar ? ', 24 and 31 December' : ''}. Whether you are actually off is in your collective agreement or contract.`);
 const fname = (id: string, l: Lang) => FEESTDAGEN.find((f) => f.id === id)?.name[l] ?? (id === 'kerstavond' ? T(l, 'Kerstavond', 'Christmas Eve') : id === 'oudejaarsdag' ? T(l, 'Oudejaarsdag', "New Year's Eve") : id);
 const statusTxt = (st: Status, l: Lang) => STATUS_TEKST[st][l];
@@ -64,9 +70,13 @@ const schoolTxt = (iso: string, l: Lang) => { const rs = regiosMetVakantie(fromI
 /* ------------------------------------------------------------------ Feestdagen van een jaar */
 const lijstNl = (xs: string[], en = 'en') => (xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} ${en} ${xs[xs.length - 1]}`);
 const waarom = (id: string, l: Lang) => (id === 'goede-vrijdag' ? T(l, 'meestal een werkdag', 'usually a working day') : id === 'bevrijdingsdag' ? T(l, 'niet iedereen is dan vrij', 'not everyone is off') : '');
+type FD = { id: string; date?: string; name: { nl: string; en: string } };
+// Tour 2 : en 2029, Bevrijdingsdag (samedi) passait dans « in het weekend » alors que les autres années elle est « niet
+// meegeteld » ; elle reste maintenant « niet meegeteld », avec en plus « valt op zaterdag » quand c'est le cas.
+const waaromOp = (f: FD, y: number, l: Lang) => { const w = waarom(f.id, l); if (!f.date || !isWeekend(fromIso(f.date))) return w; const wd = wdLong(f.date, l); return T(l, `${w}; valt in ${y} op ${wd}`, `${w}; falls on a ${wd} in ${y}`); };
 /** De telling achter « X vrije dagen door de week », in woorden die optellen tot 11. */
-export function somZin(y: number, weekend: Array<{ id: string; name: { nl: string; en: string } }>, niet: Array<{ id: string; name: { nl: string; en: string } }>, vrij: number, l: Lang): string {
-  const nw = weekend.map((f) => f.name[l]), nn = niet.map((f) => `${f.name[l]} (${waarom(f.id, l)})`);
+export function somZin(y: number, weekend: FD[], niet: FD[], vrij: number, l: Lang): string {
+  const nw = weekend.map((f) => f.name[l]), nn = niet.map((f) => `${f.name[l]} (${waaromOp(f, y, l)})`);
   const w = weekend.length ? T(l, ` en ${num(weekend.length, l)} in ${y} in het weekend (${lijstNl(nw)})`, ` and ${num(weekend.length, l)} at the weekend in ${y} (${lijstNl(nw, 'and')})`) : '';
   const n = niet.length ? T(l, ` Niet meegeteld: ${lijstNl(nn)}.`, ` Not counted: ${lijstNl(nn, 'and')}.`) : '';
   return T(l, `Van de 11 officiële feestdagen vallen er 2 altijd op zondag${w}; een vervangende dag bestaat niet.${n} Blijven over: ${num(vrij, l)} vrije dagen door de week.`,
@@ -80,9 +90,10 @@ function ftSpec(l: Lang, a: Args = {}): ToolSpec {
       const y = n(v, 'jaar'), pf = s(v, 'pf') as Profiel, o = opts(v, pf);
       const list = officieel(y, o);
       const wk = list.filter((f) => f.vrij && !isWeekend(fromIso(f.date)));
-      const weekend = list.filter((f) => !f.zondag && isWeekend(fromIso(f.date)));
-      const niet = list.filter((f) => !f.vrij && !f.zondag && !isWeekend(fromIso(f.date)));
+      const weekend = list.filter((f) => f.vrij && !f.zondag && isWeekend(fromIso(f.date)));
+      const niet = list.filter((f) => !f.vrij && !f.zondag);
       const bd = brugdagen(y, o);
+      const geen = list.filter((f) => VRIJ[f.id][pf] === 'geen' && !isWeekend(fromIso(f.date)));
       return {
         label: T(l, `Feestdagen ${y} in Nederland`, `Public holidays ${y} in the Netherlands`),
         value: T(l, `${num(wk.length, l)} vrije dagen door de week`, `${num(wk.length, l)} weekday days off`),
@@ -91,16 +102,20 @@ function ftSpec(l: Lang, a: Args = {}): ToolSpec {
         sub: somZin(y, weekend, niet, wk.length, l),
         rows: [
           [T(l, 'Vrije feestdagen op een weekdag', 'Holidays off on a weekday'), num(wk.length, l)],
-          [T(l, 'Feestdagen in het weekend (geen compensatie)', 'Holidays at the weekend (no compensation)'), num(weekend.length, l)],
+          [T(l, 'Vrije feestdagen in het weekend (geen vervangende dag)', 'Holidays off that fall at the weekend (no substitute day)'), num(weekend.length, l)],
           [T(l, 'Brugdagen (1 werkdag tussen feestdag en weekend)', 'Bridge days (1 working day between a holiday and the weekend)'), num(bd.length, l)],
           [T(l, 'Werkdagen (ma–vr)', 'Working days (Mon–Fri)'), num(sumA(werkdagen(y, o)), l)],
         ],
         table: {
           caption: T(l, `Alle officiële feestdagen ${y} met weekdag en wat de Rijksoverheid zegt voor: ${PROFIEL_NAAM[pf][l].toLowerCase()}`, `Every official holiday in ${y} with the weekday and what the government says for: ${PROFIEL_NAAM[pf][l].toLowerCase()}`),
           headers: [T(l, 'Datum', 'Date'), T(l, 'Weekdag', 'Weekday'), T(l, 'Feestdag', 'Holiday'), T(l, 'Vrij?', 'Day off?'), T(l, 'Schoolvakantie', 'School holiday')],
-          rows: list.map((f) => [dLong(f.date, l), wdLong(f.date, l), f.name[l], statusTxt(VRIJ[f.id][pf], l), schoolTxt(f.date, l)]),
+          rows: list.map((f) => [dLong(f.date, l), wdLong(f.date, l), f.name[l], vrijOpDatum(f.id, f.date, pf, l), schoolTxt(f.date, l)]),
           align: ['l', 'l', 'l', 'l', 'l'],
+          id: 'alle-datums',
         },
+        // Tour 2 : les dates promises par Google n'arrivaient qu'au 3e écran (testeurs 1 et 2) : lien direct vers la liste.
+        jump: T(l, `Direct naar alle 11 datums van ${y} ↓`, `Jump to all 11 dates of ${y} ↓`),
+        note: geen.length ? T(l, `“Telt hier als vrij”: over ${lijstNl(geen.map((f) => f.name.nl))} geeft de Rijksoverheid geen aparte uitleg; deze site telt ${geen.length === 1 ? 'die dag' : 'die dagen'} als vrij. Uw cao beslist.`, `“Counted as off here”: the government gives no separate guidance on ${lijstNl(geen.map((f) => f.name.en), 'and')}; this site counts them as days off. Your agreement decides.`) : undefined,
         aanname: aanname(o, l),
       };
     },
@@ -145,22 +160,35 @@ function fdSpec(l: Lang, a: Args = {}): ToolSpec {
 /* ------------------------------------------------------------------ Brugdagenplanner */
 function btSpec(l: Lang, a: Args = {}): ToolSpec {
   return {
-    inputs: [fJaar(l, Number(a.jaar ?? 2027), [2026, 2027, 2028, 2029, 2030]), { id: 'verlof', label: T(l, 'Verlofdagen die u inzet', 'Leave days to use'), def: Number(a.verlof ?? 5), unit: T(l, 'dagen', 'days'), max: 40 }, fRegio(l, String(a.regio ?? 'midden')), fGV(l, String(a.gv ?? 'nee')), fBD(l, String(a.bd ?? 'nee')), fOud(l)],
+    inputs: [fJaar(l, Number(a.jaar ?? 2027), [2026, 2027, 2028, 2029, 2030]), { id: 'verlof', label: T(l, 'Verlofdagen die u inzet', 'Leave days to use'), def: Number(a.verlof ?? 5), unit: T(l, 'dagen', 'days'), max: 40 }, fRegio(l, String(a.regio ?? 'midden'), false, 'regio', T(l, 'Met kinderen? De tabel telt de dagen waarop zij ook vrij zijn. Uw regio staat op de pagina ‘Regio van uw gemeente’.', 'With children? The table counts the days they are off too. Your region is on the ‘Region of your municipality’ page.')), fGV(l, String(a.gv ?? 'nee')), fBD(l, String(a.bd ?? 'nee')), fOud(l)],
     run: (v) => {
       const y = n(v, 'jaar'), o = opts(v), budget = Math.round(n(v, 'verlof')), r = s(v, 'regio') as Regio;
       const p = optimaliseer(y, budget, o), all = bruggen(y, o);
       const f = p.verlof ? p.vrij / p.verlof : 0;
       const sch = (b: { vrijVan: string; vrijTot: string }) => { let c = 0; const set = new Set([...(regioVak(r, y - 1)), ...regioVak(r, y), ...regioVak(r, y + 1)]); for (let d = fromIso(b.vrijVan); d <= fromIso(b.vrijTot); d++) if (set.has(d)) c++; return c; };
-      const rij = (b: typeof all[number]) => [span(b.verlofVan, b.verlofTot, l), num(b.verlof, l), span(b.vrijVan, b.vrijTot, l), num(b.vrij, l), b.feestdagen.map((id) => fname(id, l)).join(', '), sch(b) ? T(l, `${num(sch(b), l)} dagen`, `${num(sch(b), l)} days`) : '–'];
-      const hd = [T(l, 'Verlof nemen', 'Take leave'), T(l, 'Verlofdagen', 'Leave days'), T(l, 'Vrij op een rij', 'Off in a row'), T(l, 'Vrije dagen', 'Days off'), T(l, 'Dankzij', 'Thanks to'), T(l, `Overlap schoolvakantie ${REGIO_KORT[r][l]}`, `Overlap with school holidays, ${REGIO_KORT[r][l]}`)];
+      // Testeurs naïfs 2026-11-14, tour 2 : « Alle bruggen …, de beste eerst » contredisait le texte (Kerst « beste
+      // deal ») sans dire selon quoi on classait. Le critère est celui de bruggen() (vrije dagen per verlofdag), nommé
+      // dans le titre et montré dans sa propre colonne ; « Overlap schoolvakantie » et « – » sont dits en mots.
+      const brugTxt = (b: typeof all[number]) => (b.verlof === 1 ? T(l, `${span(b.verlofVan, b.verlofTot, l)} (brugdag)`, `${span(b.verlofVan, b.verlofTot, l)} (bridge day)`) : span(b.verlofVan, b.verlofTot, l));
+      const schTxt = (b: typeof all[number]) => (sch(b) ? T(l, `${num(sch(b), l)} dagen`, `${num(sch(b), l)} days`) : T(l, 'geen', 'none'));
+      const rij = (b: typeof all[number]) => [brugTxt(b), num(b.verlof, l), span(b.vrijVan, b.vrijTot, l), num(b.vrij, l), b.feestdagen.map((id) => fname(id, l)).join(', '), schTxt(b)];
+      const rijR = (b: typeof all[number]) => [brugTxt(b), num(b.verlof, l), span(b.vrijVan, b.vrijTot, l), num(b.vrij, l), formatDecimal(b.vrij / b.verlof, 1, l), b.feestdagen.map((id) => fname(id, l)).join(', '), schTxt(b)];
+      const sv = T(l, `In de schoolvakantie (regio ${REGIO_KORT[r][l]})`, `In the school holidays (${REGIO_KORT[r][l]} region)`);
+      const hd = [T(l, 'Verlof nemen', 'Take leave'), T(l, 'Verlofdagen', 'Leave days'), T(l, 'Vrij op een rij', 'Off in a row'), T(l, 'Vrije dagen', 'Days off'), T(l, 'Rond de feestdag', 'Around the holiday'), sv];
+      const hdR = [hd[0], hd[1], hd[2], hd[3], T(l, 'Vrije dagen per verlofdag', 'Days off per leave day'), hd[4], hd[5]];
+      // Brugdagen die niet in het plan zitten: zeggen waarom, en vanaf hoeveel verlofdagen ze er wel in zitten.
+      const inPlan = (iso: string) => p.blokken.some((b) => b.verlofVan <= iso && iso <= b.verlofTot);
+      const mist = p.verlof ? brugdagen(y, o).filter((b) => !inPlan(b.verlofVan)) : [];
+      const vanaf = (iso: string) => { for (let k = budget + 1; k <= 40; k++) if (optimaliseer(y, k, o).blokken.some((b) => b.verlofVan <= iso && iso <= b.verlofTot)) return k; return 0; };
+      const waaromNiet = mist.length ? [T(l, `${mist.length === 1 ? 'Brugdag' : 'Brugdagen'} ${lijstNl(mist.map((b) => dShort(b.verlofVan, l)))} ${mist.length === 1 ? 'zit' : 'zitten'} niet in dit plan: met ${num(budget, l)} verlofdagen levert de verdeling hierboven meer vrije dagen op. ${mist.map((b) => { const k = vanaf(b.verlofVan); return k ? `Met ${num(k, l)} verlofdagen komt ${dShort(b.verlofVan, l)} erin.` : ''; }).join(' ')}`.trim(), `${mist.length === 1 ? 'Bridge day' : 'Bridge days'} ${lijstNl(mist.map((b) => dShort(b.verlofVan, l)), 'and')} ${mist.length === 1 ? 'is' : 'are'} not in this plan: with ${num(budget, l)} leave days the split above gives more days off. ${mist.map((b) => { const k = vanaf(b.verlofVan); return k ? `With ${num(k, l)} leave days, ${dShort(b.verlofVan, l)} is included.` : ''; }).join(' ')}`.trim())] : [];
       return {
         label: T(l, `${y}: met ${num(p.verlof, l)} verlofdagen`, `${y}: using ${num(p.verlof, l)} leave days`),
         value: T(l, `${num(p.vrij, l)} dagen vrij`, `${num(p.vrij, l)} days off`),
-        sub: p.verlof ? T(l, `Eén verlofdag levert gemiddeld ${formatDecimal(f, 1, l)} vrije dagen op een rij op.`, `One leave day buys on average ${formatDecimal(f, 1, l)} days off in a row.`) : T(l, 'Vul minstens één verlofdag in.', 'Enter at least one leave day.'),
+        sub: p.verlof ? T(l, `Voor elke verlofdag krijgt u gemiddeld ${formatDecimal(f, 1, l)} dagen vrij.`, `For each leave day you get on average ${formatDecimal(f, 1, l)} days off.`) : T(l, 'Vul minstens één verlofdag in.', 'Enter at least one leave day.'),
         rows: p.blokken.slice(0, 6).map((b) => [span(b.vrijVan, b.vrijTot, l), verlofNaarVrij(b.verlof, b.vrij, l), b.vrij] as [string, string, number]),
-        table: p.blokken.length ? { caption: T(l, `Uw verlofplan ${y}: deze dagen aanvragen`, `Your ${y} leave plan: book these days`), headers: hd, rows: p.blokken.map(rij), align: ['l', 'r', 'l', 'r', 'l', 'l'] } : undefined,
-        tables: all.length ? [{ caption: T(l, `Alle bruggen van ${y}, de beste eerst`, `Every bridge in ${y}, best first`), headers: hd, rows: all.map(rij), align: ['l', 'r', 'l', 'r', 'l', 'l'] }] : undefined,
-        note: p.rest > 0 ? T(l, `${dagenTxt(p.rest, l)} verlengen geen brug meer en blijven vrij te plannen.`, `${dagenTxt(p.rest, l)} no longer lengthen any bridge and stay free to plan.`) : undefined,
+        table: p.blokken.length ? { caption: T(l, `Uw verlofplan ${y}: deze dagen aanvragen (op volgorde van de kalender)`, `Your ${y} leave plan: book these days (in calendar order)`), headers: hd, rows: p.blokken.map(rij), align: ['l', 'r', 'l', 'r', 'l', 'l'] } : undefined,
+        tables: all.length ? [{ caption: T(l, `Alle verlofblokken van ${y} rond een feestdag, ${RANG.nl}`, `Every leave block around a holiday in ${y}, ${RANG.en}`), headers: hdR, rows: all.map(rijR), align: ['l', 'r', 'l', 'r', 'r', 'l', 'l'] }] : undefined,
+        note: [...waaromNiet, ...(p.rest > 0 ? [T(l, `${dagenTxt(p.rest, l)} verlengen geen brug meer en blijven vrij te plannen.`, `${dagenTxt(p.rest, l)} no longer lengthen any bridge and stay free to plan.`)] : [])].join(' ') || undefined,
         aanname: aanname(o, l),
       };
     },
@@ -256,11 +284,13 @@ function bvSpec(l: Lang, a: Args = {}): ToolSpec {
         table: {
           caption: T(l, `Alle feestdagen ${y} voor ${PROFIEL_NAAM[pf][l].toLowerCase()}, volgens de vraag-en-antwoordpagina's van de Rijksoverheid`, `Every ${y} holiday for ${PROFIEL_NAAM[pf][l].toLowerCase()}, according to the government's question-and-answer pages`),
           headers: [T(l, 'Feestdag', 'Holiday'), T(l, 'Datum', 'Date'), T(l, 'Vrij?', 'Day off?')],
-          rows: alle.map((f) => [f.name[l], dShort(f.date, l), statusTxt(VRIJ[f.id][pf], l)]),
+          rows: alle.map((f) => [f.name[l], dShortY(f.date, l), vrijOpDatum(f.id, f.date, pf, l)]),
           align: ['l', 'l', 'l'],
+          // Tour 2 : la liste des 11 jours revenait sur chaque page thématique (3 testeurs) ; ici elle est repliée.
+          fold: T(l, `Alle 11 feestdagen van ${y} bekijken`, `See all 11 holidays of ${y}`),
         },
         aanname: T(l, `Voorbeeld voor: ${PROFIEL_NAAM[pf][l].toLowerCase()}, ${defOf(fid).name[l]} ${y}`, `Example for: ${PROFIEL_NAAM[pf][l].toLowerCase()}, ${defOf(fid).name[l]} ${y}`),
-        note: T(l, 'Er is geen wet die een feestdag tot vrije dag maakt. Uw cao of arbeidsovereenkomst beslist; de Rijksoverheid beschrijft alleen wat gangbaar is.', 'No law turns a public holiday into a day off. Your collective agreement or contract decides; the government only describes what is usual.'),
+        note: T(l, 'Er is geen wet die een feestdag tot vrije dag maakt. Uw cao (collectieve arbeidsovereenkomst) of arbeidsovereenkomst beslist; de Rijksoverheid beschrijft alleen wat gangbaar is.', 'No law turns a public holiday into a day off. Your collective agreement or contract decides; the government only describes what is usual.'),
       };
     },
   };
@@ -271,7 +301,7 @@ function uitleg(st: Status, pf: Profiel, l: Lang): string {
     case 'ja': return T(l, 'De Rijksoverheid: « Bent u ambtenaar? Dan bent u vrij », met mogelijke uitzonderingen voor politie, defensie en academische ziekenhuizen.', 'The government: civil servants have the day off, with possible exceptions for police, defence and university hospitals.');
     case 'meestal': return T(l, pf === 'school' ? 'Scholen zijn dan bijna altijd gesloten; het jaarrooster van de school beslist.' : 'Bij de meeste bedrijven een vrije dag; kijk in uw cao of contract.', pf === 'school' ? 'Schools are almost always closed; the school calendar decides.' : 'A day off at most companies; check your collective agreement or contract.');
     case 'werken': return T(l, amb ? 'Ook als ambtenaar moet u volgens de Rijksoverheid waarschijnlijk gewoon werken, tenzij uw cao anders zegt.' : 'Volgens de Rijksoverheid moet u waarschijnlijk gewoon werken; alleen uw cao of contract kan er een vrije dag van maken.', 'According to the government you probably have to work; only your agreement or contract can make it a day off.');
-    case 'vraag-na': return T(l, 'Officiële feestdag, maar niet iedereen is vrij: vraag het na bij uw werkgever of kijk in uw cao.', 'An official holiday, but not everyone is off: ask your employer or check your agreement.');
+    case 'vraag-na': return T(l, `Officiële feestdag, maar niet iedereen is vrij: vraag het na bij uw werkgever of kijk in uw cao.${amb ? ' Ook voor ambtenaren geldt een cao, bijvoorbeeld de cao Rijk of de cao van uw gemeente.' : ''}`, `An official holiday, but not everyone is off: ask your employer or check your agreement.${amb ? ' Civil servants have a collective agreement too, such as the one for central government or for their municipality.' : ''}`);
     case 'zondag': return T(l, 'Deze dag valt altijd op zondag; de vrije dag is de maandag erna.', 'This day is always a Sunday; the day off is the Monday after.');
     case 'vakantie': return T(l, 'Valt elk jaar in de kerstvakantie van alle drie de regio’s.', 'Falls in the Christmas break of all three regions every year.');
     default: return T(l, 'Deze site rekent de dag als vrij. De Rijksoverheid geeft er geen aparte uitleg over; of u echt vrij bent, staat in uw cao of contract.', 'This site counts the day as a day off. The government gives no separate guidance on it; whether you are actually off is in your agreement or contract.');

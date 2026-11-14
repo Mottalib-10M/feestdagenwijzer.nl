@@ -6,13 +6,17 @@ export type Opt = { value: string; label: string };
 /** De keuzes kunnen van de andere velden afhangen (de gemeenten van de gekozen provincie). */
 export interface SelectIn { kind: 'select'; id: string; label: string; def: string; options: Opt[] | ((v: V) => Opt[]); help?: string; adv?: boolean; wide?: boolean }
 export type Input = NumIn | ChoiceIn | SelectIn;
-export interface OutTable { caption?: string; headers: string[]; rows: string[][]; align?: Array<'l' | 'r'> }
+export interface OutTable { caption?: string; headers: string[]; rows: string[][]; align?: Array<'l' | 'r'>;
+  /** Anker van de tabel (doel van `jump`). */ id?: string;
+  /** Tabel ingeklapt onder deze titel (lijsten die elders op de pagina al staan). */ fold?: string }
 export interface ToolOut {
   label: string; value: string; sub?: string;
   rows: Array<[string, string, number?]>;
   table?: OutTable;
   tables?: OutTable[];
   note?: string;
+  /** Link in de resultaatkaart naar de eerste tabel (die een `id` heeft). */
+  jump?: string;
   /** Aanname die onder het resultaat staat (wat we als vrij rekenen). */
   aanname?: string;
 }

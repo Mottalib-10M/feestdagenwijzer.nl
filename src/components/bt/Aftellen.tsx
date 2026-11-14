@@ -11,14 +11,14 @@ import { readParams, updateURL } from '../../lib/url-state';
 import { volgende, VRIJ, STATUS_TEKST } from '../../lib/engine/feestdagen';
 import { volgendeVakantie, REGIOS, REGIO_NAAM, VAK_NAAM, type Regio } from '../../lib/engine/school';
 import { fromIso, nederlandInstant, isWeekend } from '../../lib/engine/dagen';
-import { dShort, dWeek, T as TT } from '../../lib/tool-specs';
+import { dShortY, dLong, dWeek, T as TT } from '../../lib/tool-specs';
 import { t } from '../../i18n/ui';
 import type { Lang } from '../../lib/format';
 
-interface Props { lang: Lang; regio?: string; methodHref?: string; idPrefix?: string }
+interface Props { lang: Lang; regio?: string; methodHref?: string; idPrefix?: string; regioHref?: string }
 const isoOf = (ms: number) => { const d = new Date(ms); const p = (x: number) => String(x).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; };
 
-export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a' }: Props) {
+export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a', regioHref }: Props) {
   const ui = t(lang), T = (nl: string, en: string) => TT(lang, nl, en);
   const [regio, setRegio] = useState<Regio>((r0 as Regio) ?? 'midden');
   const [now, setNow] = useState<number>(() => Date.parse(`${__BUILD_DAY__}T00:00:00Z`));
@@ -48,6 +48,7 @@ export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a' }
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
         <form data-simulateur className="grid content-start grid-cols-1 gap-x-4 gap-y-3" onSubmit={(e) => e.preventDefault()}>
           <SelectField id={`${idPrefix}-regio`} label={T('Regio voor de schoolvakantie', 'Region for school holidays')} value={regio} onChange={(v) => { setRegio(v as Regio); setMoved(true); }} options={REGIOS.map((g) => ({ value: g, label: REGIO_NAAM[g][lang] }))} />
+          {regioHref && <p className="-mt-1 text-xs text-navy-600"><a href={regioHref} className="underline hover:text-navy-900">{T('Weet u uw regio niet? Zoek uw gemeente op', 'Not sure of your region? Look up your municipality')}</a></p>}
           <div className="rounded-lg border border-accent-200 bg-accent-50 px-4 py-3" data-chrome>
             <p className="text-sm font-medium text-navy-700">{vandaag ? T(`Vandaag is het ${next.name.nl}`, `Today is ${next.name.en}`) : T(`Vanaf vandaag nog tot ${next.name.nl} ${next.date.slice(0, 4)}`, `From today until ${next.name.en} ${next.date.slice(0, 4)}`)}</p>
             {!vandaag && <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1" aria-live="off">
@@ -56,13 +57,15 @@ export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a' }
             <p className="mt-1 text-xs text-navy-600">{T('Geteld tot middernacht in Nederland, met de klok van uw toestel.', 'Counted to midnight in the Netherlands, using your device clock.')}</p>
           </div>
         </form>
-        <ResultCard label={T('Eerstvolgende feestdag vanaf vandaag', 'Next public holiday from today')} value={next.name[lang]} sub={dWeek(next.date, lang)}>
+        {/* Testeurs naïfs 2026-11-14, tour 2 : sur la page 2027, ce bloc passait à 2026 sans prévenir (« vrijdag 25 december
+            2026 » sous « 25 december 2027 zaterdag ») et donnait des dates sans année. Il dit d'où il compte, et chaque date a son année. */}
+        <ResultCard label={T(`Vanaf vandaag (${dLong(today, lang)}): de eerstvolgende feestdag`, `From today (${dLong(today, lang)}): the next public holiday`)} value={next.name[lang]} sub={dWeek(next.date, lang)}>
           <Rows rows={[
             [T('Vrij voor werknemers?', 'Day off for employees?'), isWeekend(fromIso(next.date)) ? T('Valt in het weekend', 'Falls on a weekend') : status],
-            ...lijst.slice(1, 4).map((f) => [f.name[lang], dShort(f.date, lang)] as [string, string]),
-            ...(v0 ? [[`${VAK_NAAM[v0.vak][lang]} (${REGIO_NAAM[regio][lang]})`, v0.bezig ? T('nu bezig', 'now on') : dShort(v0.p.van, lang)] as [string, string]] : []),
+            ...lijst.slice(1, 4).map((f) => [T(`Daarna: ${f.name.nl}`, `Then: ${f.name.en}`), dShortY(f.date, lang)] as [string, string]),
+            ...(v0 ? [[`${VAK_NAAM[v0.vak][lang]} (${REGIO_NAAM[regio][lang]})`, v0.bezig ? T('nu bezig', 'now on') : dShortY(v0.p.van, lang)] as [string, string]] : []),
           ]} />
-          <p className="mt-2 text-xs text-navy-600">{T('Vandaag', 'Today')}: {dWeek(today, lang)}</p>
+          <p className="mt-2 text-xs text-navy-600">{T('Dit blok telt vanaf vandaag, los van het jaar van de pagina', 'This block counts from today, whatever year the page is about')}.</p>
           <ShareRow methodHref={methodHref} labels={ui} />
         </ResultCard>
       </div>

@@ -27,7 +27,7 @@ export default defineGuide({
       { q: 'Is 2028 een schrikkeljaar?', a: `Ja. Februari ${Y} heeft 29 dagen, dus het jaar telt 366 dagen. Dat voegt hier een weekdag toe: ${Y} telt ${N(K.weekdagen(Y), 'nl')} weekdagen van maandag tot en met vrijdag. Voor wie per maand betaald krijgt, verandert er niets; voor wie per dag werkt, telt die extra dag wel mee.` },
     ],
     body: (h) => `<h2>Feestdagen 2028 met weekdag</h2>
-${h.table(['Feestdag', 'Datum', 'Weekdag'], h.officieel(Y).map((f) => [f.name.nl, h.day(f.date), h.wd(f.date)]), `De elf officiële feestdagen van ${Y}`, ['l', 'l', 'l'])}
+<details class="fold not-prose"><summary><span class="fold-h">Alle elf feestdagen van 2028 als tabel</span></summary>${h.table(['Feestdag', 'Datum', 'Weekdag'], h.officieel(Y).map((f) => [f.name.nl, h.day(f.date), h.wd(f.date)]), `De elf officiële feestdagen van ${Y}`, ['l', 'l', 'l'])}</details>
 <p>Weg in het weekend: ${weg.map((f) => `${f.name.nl} (${h.wd(f.date)})`).join(', ')}. Een vervangende dag kent Nederland niet. De Rijksoverheid publiceert de lijst per jaar; voor ${Y} staat ze er nog niet, maar elke datum volgt uit vaste regels: vaste data voor Nieuwjaar, Koningsdag, 5 mei en Kerst, en de paasdatum voor de rest. De ${h.a('method', 'methode')} legt dat uit.</p>
 <h2>Bruggen rond Koningsdag en Hemelvaart</h2>
 <p>De echte brugdagen van ${Y} zijn ${bd.map((b) => `${h.wd(b.verlofVan)} ${h.day(b.verlofVan)}`).join(' en ')}. Koningsdag op ${h.wd(kd)} maakt van ${h.wday(kb.verlofVan)} een brug. ${vijfMei(Y, 'nl')} Hemelvaart op ${h.day(hv)} geeft de tweede brug.</p>
@@ -47,7 +47,7 @@ ${h.mini('brug', { t: 'Uw verlof in 2028', d: { verlof: 3, jaar: 2028 }, e: 'Voo
       { q: 'Is 2028 a leap year?', a: `Yes. February ${Y} has 29 days, so the year has 366 days. Here that adds a weekday: ${Y} has ${N(K.weekdagen(Y), 'en')} weekdays from Monday to Friday. For people paid by the month nothing changes; for people paid by the day, the extra day does count.` },
     ],
     body: (h) => `<h2>Public holidays 2028 with weekdays</h2>
-${h.table(['Holiday', 'Date', 'Weekday'], h.officieel(Y).map((f) => [f.name.en, h.day(f.date), h.wd(f.date)]), `The eleven official holidays of ${Y}`, ['l', 'l', 'l'])}
+<details class="fold not-prose"><summary><span class="fold-h">All eleven holidays of 2028 as a table</span></summary>${h.table(['Holiday', 'Date', 'Weekday'], h.officieel(Y).map((f) => [f.name.en, h.day(f.date), h.wd(f.date)]), `The eleven official holidays of ${Y}`, ['l', 'l', 'l'])}</details>
 <p>Lost at the weekend: ${weg.map((f) => `${f.name.en} (${h.wd(f.date)})`).join(', ')}. The Netherlands has no substitute day. The government publishes the list year by year and has not yet done so for ${Y}, but every date follows fixed rules: fixed dates for New Year, King's Day, 5 May and Christmas, and the Easter date for the rest. The ${h.a('method', 'method')} explains how.</p>
 <h2>Bridges around King's Day and Ascension</h2>
 <p>The true bridge days of ${Y} are ${bd.map((b) => `${h.wd(b.verlofVan)} ${h.day(b.verlofVan)}`).join(' and ')}. King's Day on a ${h.wd(kd)} makes ${h.wday(kb.verlofVan)} a bridge. ${vijfMei(Y, 'en')} Ascension on ${h.day(hv)} gives the second bridge.</p>

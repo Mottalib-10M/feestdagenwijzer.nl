@@ -82,13 +82,24 @@ export const STATUS_TEKST: Record<Status, Tri> = {
   meestal: N('Meestal vrij', 'Usually off'),
   werken: N('Meestal werken', 'Usually a working day'),
   'vraag-na': N('Hangt van uw cao af', 'Depends on your agreement'),
-  zondag: N('Valt altijd op zondag', 'Always a Sunday'),
+  zondag: N('Altijd op zondag: geen extra vrije dag', 'Always a Sunday: no extra day off'),
   vakantie: N('Kerstvakantie', 'Christmas break'),
   // Testeurs naïfs 2026-11-14 : « Geen toelichting van de Rijksoverheid » se lisait « on ne sait pas si l'on est
   // libre à Noël », alors que la page compte ces jours comme vrij. La source ne dit rien de plus : on dit ce que
   // fait le site (compté comme jour libre) et qui décide, sans inventer de « meestal ».
-  geen: N('Als vrij gerekend; uw cao beslist', 'Counted as a day off; your agreement decides'),
+  // Tour 2 : « Als vrij gerekend; uw cao beslist » se lisait « on ne sait pas » (3 testeurs sur 3). Le libellé commence
+  // maintenant par la réponse de la page (compté libre) ; toujours sans « meestal », que la source ne dit pas.
+  geen: N('Telt hier als vrij (uw cao beslist)', 'Counted as off here (your agreement decides)'),
 };
+/**
+ * Tekst voor de kolom « Vrij? » bij een datum. Een feestdag op zaterdag of zondag levert geen vrije werkdag op:
+ * « Eerste Kerstdag, zaterdag: Als vrij gerekend » las als onzin (testeurs naïfs 2026-11-14, tour 2).
+ */
+export function vrijOpDatum(id: FeestId, date: string, pf: Profiel, l: Lang): string {
+  const st = VRIJ[id][pf], wd = weekday(fromIso(date));
+  if ((wd === 0 || wd === 6) && st !== 'zondag' && st !== 'vakantie') return l === 'nl' ? `Valt op ${wd === 6 ? 'zaterdag' : 'zondag'}: geen extra vrije dag` : `Falls on a ${wd === 6 ? 'Saturday' : 'Sunday'}: no extra day off`;
+  return STATUS_TEKST[st][l];
+}
 
 /* ------------------------------------------------------------------ Opties voor de rekenaars */
 export interface Opties {

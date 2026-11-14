@@ -38,10 +38,13 @@ export function getSpec(kind: string, lang = 'nl'): MiniSpec {
           alert: rest > 0 && p.verlof > 0 ? T(l, `U zet ${formatNumber(p.verlof, 0, l)} van uw ${formatNumber(gevraagd, 0, l)} verlofdagen in. ${rest === 1 ? 'De laatste levert' : `De laatste ${formatNumber(rest, 0, l)} leveren`} in ${v.jaar} geen extra blok vrije dagen op; die plant u waar u wilt.`, `You use ${formatNumber(p.verlof, 0, l)} of your ${formatNumber(gevraagd, 0, l)} leave days. ${rest === 1 ? 'The last one adds' : `The last ${formatNumber(rest, 0, l)} add`} no extra block of days off in ${v.jaar}; plan ${rest === 1 ? 'it' : 'them'} wherever you like.`) : undefined,
           rows: [
             ...blokken,
-            [T(l, 'Elke verlofdag levert gemiddeld', 'Each leave day gives on average'), p.verlof ? T(l, `${formatDecimal(p.vrij / p.verlof, 1, l)} vrije dagen op`, `${formatDecimal(p.vrij / p.verlof, 1, l)} days off`) : '–'],
+            [T(l, 'Vrije dagen per verlofdag (gemiddeld)', 'Days off per leave day (average)'), p.verlof ? formatDecimal(p.vrij / p.verlof, 1, l) : '–'],
             [T(l, 'Brugdagen dit jaar (1 werkdag tussen feestdag en weekend)', 'Bridge days this year (1 working day between a holiday and the weekend)'), formatNumber(bd.length, 0, l)],
           ],
-          note: T(l, 'Goede Vrijdag en 5 mei tellen hier als werkdag. Geeft uw cao ze vrij? Zet ze dan aan onder ‘Meer opties’ in de brugdagenplanner.', 'Good Friday and 5 May count as working days here. Does your agreement give them off? Switch them on under “More options” in the bridge-day planner.'),
+          note: T(l, 'Goede Vrijdag en 5 mei tellen hier als werkdag.', 'Good Friday and 5 May count as working days here.'),
+          // Tour 2 (3 testeurs) : « Zet ze aan onder ‘Meer opties’ in de brugdagenplanner » renvoyait à un réglage absent du
+          // bloc. Le lien ouvre la planner avec les deux jours déjà comptés comme vrij et le même nombre de verlofdagen.
+          go: [T(l, 'Goede Vrijdag en 5 mei vrij in uw cao? Reken het zo uit →', 'Good Friday and 5 May off in your agreement? Calculate it that way →'), `/${l}/${T(l, 'brugdagen', 'bridge-days')}-${v.jaar === 2028 ? 2028 : 2027}/?jaar=${v.jaar}&verlof=${gevraagd}&gv=ja&bd=ja`],
         };
       },
     };

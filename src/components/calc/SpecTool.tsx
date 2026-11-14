@@ -62,7 +62,8 @@ export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }
             <details className="sm:col-span-2 rounded-lg border border-navy-200 px-3 py-2">
               {/* Testeurs naïfs 2026-11-14 : « Meer opties » ne disait pas ce qu'il cachait ; le titre montre chaque réglage et sa valeur. */}
               <summary className="cursor-pointer text-sm font-medium text-navy-700">{ui.moreOptions}
-                <span data-actuellement className="mt-1 block text-xs font-normal text-navy-600">{adv.map((i) => `${i.label.replace(/\?$/, '')}: ${waarde(i, rv)}`).join(' · ')}</span>
+                {/* Tour 2 : « Goede Vrijdag vrij (cao): Nee » se lisait comme une réponse imposée ; on dit que c'est un choix modifiable. */}
+                <span data-actuellement className="mt-1 block text-xs font-normal text-navy-600">{lang === 'nl' ? 'Nu gerekend met: ' : 'Now calculated with: '}{adv.map((i) => `${i.label.replace(/\?$/, '')}: ${waarde(i, rv)}`).join(' · ')}{lang === 'nl' ? '. Tik om aan te passen.' : '. Tap to change.'}</span>
               </summary>
               <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">{adv.map(field)}</div>
             </details>
@@ -72,20 +73,22 @@ export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }
           <MentionExemple lang={lang} touched={touched} suppose={out.aanname} modifiables={spec.inputs.length} className="mt-2" />
           <Rows rows={out.rows} />
           {out.note && <p className="mt-2 text-xs text-navy-600">{out.note}</p>}
+          {out.jump && [out.table, ...(out.tables ?? [])].find((x) => x?.id) && <p className="mt-2 text-sm"><a href={`#${idPrefix}-${[out.table, ...(out.tables ?? [])].find((x) => x?.id)!.id}`} className="font-medium text-accent-700 underline">{out.jump}</a></p>}
           <ShareRow methodHref={methodHref} labels={ui} />
         </ResultCard>
       </div>
       {/* Testeurs naïfs 2026-11-14 : ces tableaux (5 ou 6 colonnes) étaient coupés à droite sur téléphone, la colonne
           « Vrij? » cachée. Comme les tableaux du contenu (lib/tableaux.ts), ils deviennent des fiches sous 768 px. */}
-      {[out.table, ...(out.tables ?? [])].filter((x) => !!x).map((tb, ti) => { const fiche = ficheTitre(tb!.headers, tb!.rows); return (
-        <div key={ti} className="mt-4 overflow-x-auto">
+      {[out.table, ...(out.tables ?? [])].filter((x) => !!x).map((tb, ti) => { const fiche = ficheTitre(tb!.headers, tb!.rows); const tabel = (
+        <div key={ti} id={tb!.id ? `${idPrefix}-${tb!.id}` : undefined} className="mt-4 overflow-x-auto scroll-mt-20">
           <table className={`w-full text-sm${tb!.headers.length >= 3 ? ' empile' : ''}`} data-titre={fiche.titre ? '2' : undefined}>
             {tb!.caption && <caption className="mb-2 text-left text-sm text-navy-700">{tb!.caption}</caption>}
             <thead><tr>{tb!.headers.map((h, i) => <th key={h + i} scope="col" className={`border-b border-navy-300 px-2 py-1.5 font-semibold text-navy-900 ${tb!.align?.[i] === 'r' ? 'text-right' : 'text-left'}`}>{h}</th>)}</tr></thead>
             <tbody>{tb!.rows.map((r, k) => { const lab = etiquettes(tb!.headers, r.length, fiche); return <tr key={k}>{r.map((c, i) => <td key={i} data-label={lab[i] || undefined} className={`tabular-nums border-b border-navy-100 px-2 py-1.5 text-navy-800 ${tb!.align?.[i] === 'r' ? 'text-right' : 'text-left'}`} dangerouslySetInnerHTML={{ __html: c }} />)}</tr>; })}</tbody>
           </table>
         </div>
-      ); })}
+      );
+      return tb!.fold ? <details key={ti} className="mt-4 rounded-lg border border-navy-200 px-3 py-2"><summary className="cursor-pointer text-sm font-medium text-accent-700">{tb!.fold}</summary>{tabel}</details> : tabel; })}
     </div>
   );
 }

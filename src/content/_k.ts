@@ -45,3 +45,13 @@ export function vijfMei(y: number, l: Lang): string {
   if (wd === 1 || wd === 5) { const n = vrijRond(bv, { bevrijdingsdag: true }); return l === 'nl' ? `${nl}: wie op 5 mei vrij is, heeft zonder verlof een lang weekend van ${N(n, 'nl')} dagen.` : `${en}: if 5 May is off for you, that is a ${N(n, 'en')}-day weekend without leave.`; }
   return l === 'nl' ? `${nl}.` : `${en}.`;
 }
+/**
+ * « De beste brug » : partout le premier de K.bruggen(), classé sur vrije dagen per verlofdag (testeurs naïfs
+ * 2026-11-14, tour 2 : la page 2028 appelait « beste » la kerstbrug, 3e de la liste « de beste eerst »).
+ * `langsteBrug` : la plus longue période libre, qu'on nomme « langste », jamais « beste ». tests/datums.test.ts.
+ */
+export const besteBrug = (y: number) => K.bruggen(y)[0];
+/** Bruggen die even goed zijn als de beste (zelfde vrije dagen per verlofdag), in volgorde van de lijst. */
+export const besteBruggen = (y: number) => { const a = K.bruggen(y), r = a[0].vrij / a[0].verlof; return a.filter((b) => b.vrij / b.verlof === r); };
+export const langsteBrug = (y: number) => [...K.bruggen(y)].sort((a, b) => b.vrij - a.vrij || a.verlof - b.verlof || a.verlofVan.localeCompare(b.verlofVan))[0];
+export { RANG } from '../lib/tool-specs';

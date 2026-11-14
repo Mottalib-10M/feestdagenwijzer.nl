@@ -10,5 +10,5 @@ const { kind, lang, arg, idPrefix = 't' } = Astro.props;
 const methodHref = route('method', lang);
 ---
 {kind === 'kalender' ? <Kalender client:load lang={lang} year={Number(arg?.jaar ?? 2027)} regio={arg?.regio ? String(arg.regio) : undefined} methodHref={methodHref} idPrefix={idPrefix} />
-  : kind === 'aftellen' ? <Aftellen client:load lang={lang} regio={arg?.regio ? String(arg.regio) : undefined} methodHref={methodHref} idPrefix={idPrefix} />
+  : kind === 'aftellen' ? <Aftellen client:load lang={lang} regio={arg?.regio ? String(arg.regio) : undefined} methodHref={methodHref} idPrefix={idPrefix} regioHref={route('regio-schoolvakantie', lang)} />
   : <SpecTool client:load kind={kind} lang={lang} arg={arg ? JSON.stringify(arg) : undefined} methodHref={methodHref} idPrefix={idPrefix} />}

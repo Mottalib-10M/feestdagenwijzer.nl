@@ -15,8 +15,8 @@ import { GUIDES } from '../src/lib/pages';
 import { HOME } from '../src/content/home';
 import { helpers } from '../src/lib/helpers';
 import { vijfMei } from '../src/content/_k';
-import { datum, officieel, PROFIELEN, VRIJ, STATUS_TEKST, optiesVoor } from '../src/lib/engine/feestdagen';
-import { brugdagen } from '../src/lib/engine/bruggen';
+import { datum, officieel, PROFIELEN, VRIJ, STATUS_TEKST, optiesVoor, vrijOpDatum } from '../src/lib/engine/feestdagen';
+import { brugdagen, bruggen } from '../src/lib/engine/bruggen';
 import { fromIso, weekday, isWeekend } from '../src/lib/engine/dagen';
 import { getTool, somZin } from '../src/lib/tool-specs';
 import type { Lang } from '../src/lib/format';
@@ -92,8 +92,8 @@ describe('4. telling van de vrije weekdagen', () => {
   it('2 zondagen + weekend + niet meegeteld + vrij = 11, elk jaar en elk profiel', () => {
     for (let y = 2026; y <= 2030; y++) for (const pf of PROFIELEN) {
       const list = officieel(y, optiesVoor(pf));
-      const weekend = list.filter((f) => !f.zondag && isWeekend(fromIso(f.date)));
-      const niet = list.filter((f) => !f.vrij && !f.zondag && !isWeekend(fromIso(f.date)));
+      const weekend = list.filter((f) => f.vrij && !f.zondag && isWeekend(fromIso(f.date)));
+      const niet = list.filter((f) => !f.vrij && !f.zondag);
       const vrij = list.filter((f) => f.vrij && !isWeekend(fromIso(f.date)));
       expect(2 + weekend.length + niet.length + vrij.length).toBe(11);
       const out = getTool('ft', 'nl', { jaar: y, pf }).run({ jaar: String(y), pf });
@@ -110,10 +110,69 @@ describe('4. telling van de vrije weekdagen', () => {
 });
 
 describe('5. Nieuwjaar en Kerst: een antwoord in de kolom « Vrij? »', () => {
-  it('geen « Geen toelichting » meer, wel « als vrij gerekend »', () => {
+  it('geen « Geen toelichting » meer; het label begint met wat de site rekent', () => {
     for (const id of ['nieuwjaarsdag', 'eerste-kerstdag', 'tweede-kerstdag'] as const) {
-      expect(STATUS_TEKST[VRIJ[id].bedrijf].nl).toBe('Als vrij gerekend; uw cao beslist');
+      expect(STATUS_TEKST[VRIJ[id].bedrijf].nl).toBe('Telt hier als vrij (uw cao beslist)');
       expect(STATUS_TEKST[VRIJ[id].bedrijf].nl).not.toMatch(/geen toelichting/i);
     }
+  });
+  it('een feestdag op zaterdag of zondag zegt « geen extra vrije dag » (tour 2: « zaterdag … als vrij gerekend »)', () => {
+    expect(vrijOpDatum('eerste-kerstdag', datum('eerste-kerstdag', 2027), 'bedrijf', 'nl')).toBe('Valt op zaterdag: geen extra vrije dag');
+    expect(vrijOpDatum('nieuwjaarsdag', datum('nieuwjaarsdag', 2028), 'bedrijf', 'nl')).toBe('Valt op zaterdag: geen extra vrije dag');
+    expect(vrijOpDatum('eerste-kerstdag', datum('eerste-kerstdag', 2028), 'bedrijf', 'nl')).toBe('Telt hier als vrij (uw cao beslist)');
+    const rows = getTool('ft', 'nl', { jaar: 2027 }).run({ jaar: '2027', pf: 'bedrijf' }).table!.rows;
+    expect(rows.filter((r) => /zaterdag|zondag/.test(r[1])).every((r) => /geen extra vrije dag/.test(r[3]))).toBe(true);
+  });
+  it('2029: Bevrijdingsdag (zaterdag) staat bij « niet meegeteld », net als de andere jaren', () => {
+    const s = getTool('ft', 'nl', { jaar: 2029 }).run({ jaar: '2029', pf: 'bedrijf' }).sub!;
+    expect(s).not.toMatch(/in het weekend \(Bevrijdingsdag\)/);
+    expect(s).toContain('Bevrijdingsdag (niet iedereen is dan vrij; valt in 2029 op zaterdag)');
+  });
+});
+
+/**
+ * 6. « De beste brug » (testeurs naïfs 2026-11-14, tour 2) : la page 2028 appelait « beste » la kerstbrug, 3e de la
+ * liste « de beste eerst ». Le critère (vrije dagen per verlofdag) est nommé à l'écran, et toute date citée comme
+ * « beste » dans un texte est la première de la liste de la rekenhulp, pour chaque année.
+ */
+describe('6. de beste brug = de eerste van de lijst', () => {
+  const DAG = new RegExp(`(${DAGEN.nl.join('|')})${S}(\\d{1,2})${S}(${MAANDEN.nl.join('|')})${S}(\\d{4})`, 'i');
+  const isoVan = (m: RegExpMatchArray) => `${m[4]}-${String(MAANDEN.nl.indexOf(m[3].toLowerCase()) + 1).padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+  it('elke zin met « beste brug(dag) » noemt als eerste datum de top van K.bruggen', () => {
+    let n = 0; const fout: string[] = [];
+    for (const { waar, tekst } of teksten('nl')) {
+      const plat = tekst.replace(/<[^>]+>/g, ' ');
+      for (const zin of plat.split(/(?<=[.?!])\s+/)) {
+        if (!/\bbeste brug(dag)?\b/i.test(zin)) continue;
+        const m = zin.match(DAG); if (!m) continue;
+        n++;
+        const iso = isoVan(m), y = Number(m[4]);
+        if (bruggen(y)[0].verlofVan !== iso) fout.push(`${waar}: « ${zin.slice(0, 140)} »`);
+      }
+    }
+    expect(n).toBeGreaterThanOrEqual(2);
+    expect(fout).toEqual([]);
+  });
+  it('geen « de beste eerst », « beste deal » of « staat bovenaan » zonder criterium', () => {
+    for (const l of LANGS) for (const { waar, tekst } of teksten(l)) expect(/de beste eerst|beste deal|kerstbrug staat bovenaan|best first|best deal|tops the list/i.test(tekst), `${waar} (${l})`).toBe(false);
+  });
+  it('de lijst van de planner noemt het criterium en volgt het, elk jaar', () => {
+    for (let y = 2026; y <= 2030; y++) {
+      const out = getTool('bt', 'nl', { jaar: y, verlof: 5 }).run({ jaar: String(y), verlof: 5, regio: 'midden', gv: 'nee', bd: 'nee', od: 'werk' });
+      const t = out.tables![0];
+      expect(t.caption).toContain('gerangschikt op: vrije dagen per verlofdag');
+      const r = t.rows.map((x) => Number(x[4].replace(',', '.')));
+      for (let i = 1; i < r.length; i++) expect(r[i]).toBeLessThanOrEqual(r[i - 1]);
+      expect(t.rows[0][0]).toContain(bruggen(y)[0].verlofVan === '' ? 'x' : String(Number(bruggen(y)[0].verlofVan.slice(8))));
+    }
+  });
+  it('2028: intro noemt vrijdag 28 april als beste en Kerst als langste', () => {
+    const t = teksten('nl').find((x) => x.waar === 'brugdagen-2028')!.tekst;
+    expect(t).toContain('Brugdagen 2028: de beste brug (gerangschikt op: vrije dagen per verlofdag) is vrijdag 28 april 2028');
+    expect(t).toContain('De langste vrije periode geeft Kerst: 3 verlofdagen → 10 dagen vrij');
+  });
+  it('een periode over de jaargrens draagt twee jaartallen', () => {
+    const out = getTool('bt', 'nl', { jaar: 2028, verlof: 3 }).run({ jaar: '2028', verlof: 3, regio: 'midden', gv: 'nee', bd: 'nee', od: 'werk' });
+    expect(out.rows[0][0]).toBe('za 23 december 2028 – ma 1 januari 2029');
   });
 });
