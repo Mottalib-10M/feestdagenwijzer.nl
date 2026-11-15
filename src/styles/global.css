@@ -149,3 +149,6 @@ p[id$="-help"]:not([role="status"]), [data-fixe], [data-actuellement], [aria-liv
 .kal-grid td.tf { background: var(--color-navy-100); color: var(--color-navy-900); font-weight: 600; border-radius: 4px; }
 .kal-grid td.sv { background: #fef3c7; color: var(--color-navy-900); border-radius: 4px; }
 @media print { .kal-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } header, footer, nav, .no-print { display: none !important; } }
+
+/* Champs en subgrid : quand le formulaire est étiré à la hauteur du résultat voisin, ses rangées ne doivent pas s'étirer (trous entre libellé, case et aide). */
+:where(form, div, fieldset):has(> .grid-rows-subgrid) { align-content: start; }
