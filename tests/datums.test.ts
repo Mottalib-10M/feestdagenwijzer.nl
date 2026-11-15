@@ -25,7 +25,7 @@ const LANGS: Lang[] = ['nl', 'en'];
 function teksten(l: Lang): Array<{ waar: string; tekst: string }> {
   const h = helpers(l), out: Array<{ waar: string; tekst: string }> = [];
   const H = HOME[l];
-  out.push({ waar: 'home', tekst: [H.title, H.description, H.intro, H.resume, ...H.faqs.flatMap((f) => [f.q, f.a]), H.why(h), ...H.sections(h).flatMap((s) => [s.title, s.html])].join('\n') });
+  out.push({ waar: 'home', tekst: [H.title, H.description, H.intro, H.resume, ...H.faqs.flatMap((f) => [f.q, f.a]), H.why(h), H.brug(h), ...H.sections(h).flatMap((s) => [s.title, s.html])].join('\n') });
   for (const g of GUIDES) {
     const p = g[l];
     out.push({ waar: g.id, tekst: [p.title, p.description, p.h1, p.intro, p.resume, p.card, ...p.faqs.flatMap((f) => [f.q, f.a]), p.body(h)].join('\n') });
@@ -160,7 +160,7 @@ describe('6. de beste brug = de eerste van de lijst', () => {
     for (let y = 2026; y <= 2030; y++) {
       const out = getTool('bt', 'nl', { jaar: y, verlof: 5 }).run({ jaar: String(y), verlof: 5, regio: 'midden', gv: 'nee', bd: 'nee', od: 'werk' });
       const t = out.tables![0];
-      expect(t.caption).toContain('gerangschikt op: vrije dagen per verlofdag');
+      expect(t.caption).toContain('eerst die met de meeste vrije dagen voor elke verlofdag');
       const r = t.rows.map((x) => Number(x[4].replace(',', '.')));
       for (let i = 1; i < r.length; i++) expect(r[i]).toBeLessThanOrEqual(r[i - 1]);
       expect(t.rows[0][0]).toContain(bruggen(y)[0].verlofVan === '' ? 'x' : String(Number(bruggen(y)[0].verlofVan.slice(8))));
@@ -168,11 +168,38 @@ describe('6. de beste brug = de eerste van de lijst', () => {
   });
   it('2028: intro noemt vrijdag 28 april als beste en Kerst als langste', () => {
     const t = teksten('nl').find((x) => x.waar === 'brugdagen-2028')!.tekst;
-    expect(t).toContain('Brugdagen 2028: de beste brug (gerangschikt op: vrije dagen per verlofdag) is vrijdag 28 april 2028');
+    expect(t).toContain('Brugdagen 2028: de beste brug (de meeste vrije dagen voor elke verlofdag) is vrijdag 28 april 2028');
     expect(t).toContain('De langste vrije periode geeft Kerst: 3 verlofdagen → 10 dagen vrij');
   });
   it('een periode over de jaargrens draagt twee jaartallen', () => {
     const out = getTool('bt', 'nl', { jaar: 2028, verlof: 3 }).run({ jaar: '2028', verlof: 3, regio: 'midden', gv: 'nee', bd: 'nee', od: 'werk' });
     expect(out.rows[0][0]).toBe('za 23 december 2028 – ma 1 januari 2029');
+  });
+});
+
+describe('7. Tour 4: carte « Brugdagen 2027 », dates une seule fois sur l\'accueil, libellé « werkgever »', () => {
+  it('la carte de l\'accueil dit ce que contient le plan à 5 verlofdagen de la rekenhulp (même total, mêmes blocs, pas le 7 mai)', () => {
+    const g = GUIDES.find((x) => x.id === 'brugdagen-2027')!;
+    const out = getTool('bt', 'nl', { jaar: 2027, verlof: 5 }).run({ jaar: '2027', verlof: 5, regio: 'midden', gv: 'nee', bd: 'nee', od: 'werk' });
+    const card = g.nl.card;
+    expect(card).toContain(`Met 5 verlofdagen ${out.value}`);
+    expect(out.rows.length).toBe(card.split(/, | en /).length);
+    expect(card).not.toMatch(/7 mei/);
+    expect(card).toBe('Met 5 verlofdagen 13 dagen vrij: rond Paasmaandag en Koningsdag');
+  });
+  it('accueil: seule la ligne « Datums » du haut énumère les 11 dates ; aucun autre texte n\'en reprend la liste', () => {
+    for (const l of LANGS) {
+      const h = helpers(l), H = HOME[l];
+      const dagen = officieel(2027).map((f) => h.day(f.date));
+      for (const tekst of [H.resume, H.why(h), H.brug(h), ...H.sections(h).map((x) => x.html)]) expect(dagen.filter((d) => tekst.includes(d)).length).toBeLessThan(8);
+    }
+  });
+  it('« Hangt af van uw werkgever » partout, avec « (staat in uw cao of arbeidscontract) »', () => {
+    expect(STATUS_TEKST['vraag-na'].nl).toBe('Hangt af van uw werkgever');
+    expect(vrijOpDatum('bevrijdingsdag', datum('bevrijdingsdag', 2027), 'ambtenaar', 'nl')).toBe('Hangt af van uw werkgever (staat in uw cao of arbeidscontract)');
+    const bv = getTool('bv', 'nl', { pf: 'ambtenaar', fd: 'bevrijdingsdag' }).run({ pf: 'ambtenaar', fd: 'bevrijdingsdag', jaar: '2027' });
+    expect(bv.value).toBe('Hangt af van uw werkgever');
+    expect(bv.sub).toMatch(/^\(staat in uw cao of arbeidscontract\)/);
+    for (const l of LANGS) for (const t of teksten(l)) expect(t.tekst).not.toMatch(/Hangt van uw cao af/);
   });
 });

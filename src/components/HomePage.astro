@@ -31,7 +31,8 @@ const who = { nl: 'Wie achter de site staat', en: 'Who runs this site' }[lang];
     <p class="mt-2 text-base text-navy-700 sm:text-lg">{x.intro}</p>
     <div class="mt-3 text-sm leading-relaxed text-navy-700" set:html={x.snel} />
   </header>
-  <div data-outil data-chrome><Tool kind="ft" lang={lang} arg={{ jaar: 2027 }} idPrefix="home" /></div>
+  <div data-outil data-chrome><Tool kind="ft" lang={lang} arg={{ jaar: 2027, fold: 1 }} idPrefix="home" /></div>
+  <section class="mt-6"><Body html={x.brug(h)} path={path} lang={lang} /></section>
   <div data-chrome class="mt-4"><Tool kind="aftellen" lang={lang} idPrefix="home-a" /></div>
   <dl data-chrome class="limits my-6 text-sm">
     {x.facts.map((f) => <div><dt>{f.k}</dt><dd>{f.v}</dd></div>)}

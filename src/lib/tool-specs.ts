@@ -6,7 +6,7 @@
 import type { ToolSpec, V, ToolOut, Opt } from './tool-types';
 import { resolve } from './tool-types';
 import { formatNumber, formatDecimal, TAG, type Lang } from './format';
-import { officieel, vrijeDagen, datum, defOf, isVrij, VRIJ, STATUS_TEKST, vrijOpDatum, PROFIELEN, PROFIEL_NAAM, FEESTDAGEN, optiesVoor, volgende, type FeestId, type Profiel, type Opties, type Status } from './engine/feestdagen';
+import { officieel, vrijeDagen, datum, defOf, isVrij, VRIJ, STATUS_TEKST, STATUS_KLEIN, statusVol, vrijOpDatum, PROFIELEN, PROFIEL_NAAM, FEESTDAGEN, optiesVoor, volgende, type FeestId, type Profiel, type Opties, type Status } from './engine/feestdagen';
 import { optimaliseer, bruggen, brugdagen, werkdagen, weekdagen, werkdagenTussen } from './engine/bruggen';
 import { kalender, SCHOOLJAREN, REGIOS, REGIO_KORT, REGIO_NAAM, VAKS, VAK_NAAM, ADVIES, dagen, weekdagenIn, volgendeVakantie, regiosMetVakantie, zelfdeOveral, PROVINCIE_NAMEN, keuzes, regioVan, sj, type Regio, type Vak, type Periode } from './engine/school';
 import { verleng } from './engine/termijnen';
@@ -46,7 +46,8 @@ const off = (iso: string, d: number) => toIso(fromIso(iso) + d);
 const sumA = (a: number[]) => a.reduce((x, z) => x + z, 0);
 export const JAREN = [2026, 2027, 2028, 2029, 2030];
 /** Het criterium van bruggen() (engine/bruggen.ts), overal met dezelfde woorden genoemd. */
-export const RANG = { nl: 'gerangschikt op: vrije dagen per verlofdag', en: 'ranked by: days off per leave day' };
+// Tour 4 (testeurs 1 et 3) : « gerangschikt op: vrije dagen per verlofdag » se lisait comme un tableur ; même critère, en mots simples.
+export const RANG = { nl: 'de meeste vrije dagen voor elke verlofdag', en: 'the most days off for each leave day' };
 export const MAANDEN = (l: Lang) => Array.from({ length: 12 }, (_, i) => new Date(Date.UTC(2027, i, 15)).toLocaleDateString(TAG(l), { month: 'long', timeZone: 'UTC' }));
 
 /* ------------------------------------------------------------------ Velden */
@@ -65,7 +66,7 @@ const aanname = (o: Opties, l: Lang) => T(l,
   `Gerekend als vrij: Nieuwjaarsdag, Tweede Paasdag, Koningsdag, Hemelvaart, Tweede Pinksterdag en de Kerstdagen${o.goedeVrijdag ? ', Goede Vrijdag' : ''}${o.bevrijdingsdag ? ', 5 mei' : ''}${o.oudejaar ? ', 24 en 31 december' : ''}. Uw cao (collectieve arbeidsovereenkomst) of contract beslist.`,
   `Counted as days off: New Year's Day, Easter Monday, King's Day, Ascension Day, Whit Monday and Christmas${o.goedeVrijdag ? ', Good Friday' : ''}${o.bevrijdingsdag ? ', 5 May' : ''}${o.oudejaar ? ', 24 and 31 December' : ''}. Your collective agreement or contract decides.`);
 const fname = (id: string, l: Lang) => FEESTDAGEN.find((f) => f.id === id)?.name[l] ?? (id === 'kerstavond' ? T(l, 'Kerstavond', 'Christmas Eve') : id === 'oudejaarsdag' ? T(l, 'Oudejaarsdag', "New Year's Eve") : id);
-const statusTxt = (st: Status, l: Lang) => STATUS_TEKST[st][l];
+const statusTxt = (st: Status, l: Lang) => statusVol(st, l);
 const schoolTxt = (iso: string, l: Lang) => { const rs = regiosMetVakantie(fromIso(iso)); return rs.length === 3 ? T(l, 'alle regio’s', 'all regions') : rs.length ? rs.map((r) => REGIO_KORT[r][l]).join(', ') : T(l, 'geen', 'none'); };
 
 /* ------------------------------------------------------------------ Feestdagen van een jaar */
@@ -104,7 +105,7 @@ function ftSpec(l: Lang, a: Args = {}): ToolSpec {
           [T(l, 'Vrije feestdagen op een weekdag', 'Holidays off on a weekday'), num(wk.length, l)],
           [T(l, 'Vrije feestdagen in het weekend (geen vervangende dag)', 'Holidays off that fall at the weekend (no substitute day)'), num(weekend.length, l)],
           // Tour 3 (testeur 2, validé par l'éditeur) : « Brugdagen 2 » sans date ; les brugdagen sont nommés.
-          [T(l, 'Brugdagen (1 werkdag tussen feestdag en weekend)', 'Bridge days (1 working day between a holiday and the weekend)'), bd.length ? `${num(bd.length, l)}: ${lijstNl(bd.map((b) => dShort(b.verlofVan, l)), T(l, 'en', 'and'))}` : num(bd.length, l)],
+          [T(l, 'Brugdagen (1 werkdag tussen feestdag en weekend)', 'Bridge days (1 working day between a holiday and the weekend)'), bd.length ? `${num(bd.length, l)}: ${lijstNl([...bd].sort((p, q) => p.verlofVan.localeCompare(q.verlofVan)).map((b) => dShort(b.verlofVan, l)), T(l, 'en', 'and'))}` : num(bd.length, l)],
           [T(l, 'Werkdagen (ma–vr)', 'Working days (Mon–Fri)'), num(sumA(werkdagen(y, o)), l)],
         ],
         table: {
@@ -113,6 +114,9 @@ function ftSpec(l: Lang, a: Args = {}): ToolSpec {
           rows: list.map((f) => [dLong(f.date, l), wdLong(f.date, l), f.name[l], vrijOpDatum(f.id, f.date, pf, l), schoolTxt(f.date, l)]),
           align: ['l', 'l', 'l', 'l', 'l'],
           id: 'alle-datums',
+          // Tour 4 (validé par l'éditeur) : sur l'accueil, la ligne « Datums 2027 » du haut donne déjà les dates ; la liste
+          // complète y est repliée (arg `fold`), le lien « Direct naar … ↓ » l'ouvre.
+          fold: a.fold ? T(l, `Alle 11 datums van ${y} met wie er vrij is`, `All 11 dates of ${y} with who is off`) : undefined,
         },
         // Tour 2 : les dates promises par Google n'arrivaient qu'au 3e écran (testeurs 1 et 2) : lien direct vers la liste.
         jump: T(l, `Direct naar alle 11 datums van ${y} ↓`, `Jump to all 11 dates of ${y} ↓`),
@@ -189,7 +193,7 @@ function btSpec(l: Lang, a: Args = {}): ToolSpec {
         rows: p.blokken.slice(0, 6).map((b) => [span(b.vrijVan, b.vrijTot, l), verlofNaarVrij(b.verlof, b.vrij, l), b.vrij] as [string, string, number]),
         table: p.blokken.length ? { caption: T(l, `Uw verlofplan ${y}: deze dagen aanvragen (op volgorde van de kalender)`, `Your ${y} leave plan: book these days (in calendar order)`), headers: hd, rows: p.blokken.map(rij), align: ['l', 'r', 'l', 'r', 'l', 'l'] } : undefined,
         // Tour 3 (testeurs 1, 2 et 3) : après le plan, la même liste de blocs revenait en entier ; elle est repliée.
-        tables: all.length ? [{ caption: T(l, `Alle verlofblokken van ${y} rond een feestdag, ${RANG.nl}`, `Every leave block around a holiday in ${y}, ${RANG.en}`), headers: hdR, rows: all.map(rijR), align: ['l', 'r', 'l', 'r', 'r', 'l', 'l'], fold: T(l, `Andere mogelijkheden bekijken: alle ${num(all.length, l)} verlofblokken van ${y}`, `See other options: all ${num(all.length, l)} leave blocks of ${y}`) }] : undefined,
+        tables: all.length ? [{ caption: T(l, `Alle verlofblokken van ${y} rond een feestdag, eerst die met ${RANG.nl}`, `Every leave block around a holiday in ${y}, first those with ${RANG.en}`), headers: hdR, rows: all.map(rijR), align: ['l', 'r', 'l', 'r', 'r', 'l', 'l'], fold: T(l, `Andere mogelijkheden bekijken: alle ${num(all.length, l)} verlofblokken van ${y}`, `See other options: all ${num(all.length, l)} leave blocks of ${y}`) }] : undefined,
         note: [...waaromNiet, ...(p.rest > 0 ? [T(l, `${dagenTxt(p.rest, l)} verlengen geen brug meer en blijven vrij te plannen.`, `${dagenTxt(p.rest, l)} no longer lengthen any bridge and stay free to plan.`)] : [])].join(' ') || undefined,
         aanname: aanname(o, l),
       };
@@ -280,8 +284,8 @@ function bvSpec(l: Lang, a: Args = {}): ToolSpec {
       const alle = officieel(y);
       return {
         label: T(l, `${defOf(fid).name[l]} ${y}, ${PROFIEL_NAAM[pf][l].toLowerCase()}`, `${defOf(fid).name[l]} ${y}, ${PROFIEL_NAAM[pf][l].toLowerCase()}`),
-        value: statusTxt(st, l),
-        sub: `${dWeek(d, l)}. ${uitleg(st, pf, l)}`,
+        value: STATUS_TEKST[st][l],
+        sub: `${STATUS_KLEIN[st] ? `${STATUS_KLEIN[st]![l]} ` : ''}${dWeek(d, l)}. ${uitleg(st, pf, l)}`,
         rows: PROFIELEN.map((p) => [PROFIEL_NAAM[p][l], statusTxt(VRIJ[fid][p], l)] as [string, string]),
         table: {
           caption: T(l, `Alle feestdagen ${y} voor ${PROFIEL_NAAM[pf][l].toLowerCase()}, volgens de vraag-en-antwoordpagina's van de Rijksoverheid`, `Every ${y} holiday for ${PROFIEL_NAAM[pf][l].toLowerCase()}, according to the government's question-and-answer pages`),

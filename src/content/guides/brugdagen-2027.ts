@@ -12,6 +12,11 @@ const mei = SV(2026, 'midden').mei;
 const metBd = K.optimaliseer(Y, 3, { bevrijdingsdag: true });
 const paas = alle.find((b) => b.feestdagen.includes('tweede-paasdag') && b.verlof === 4)!;
 const pink = alle.find((b) => b.feestdagen.includes('tweede-pinksterdag') && b.verlof === 4)!;
+// Tour 4 (testeur 2, validé par l'éditeur) : « Brugdagen ma 26 april en vr 7 mei; 5 verlofdagen = 13 dagen vrij » faisait
+// croire que les 13 jours venaient des deux ponts, alors que le plan à 5 jours ne prend pas le 7 mai. La carte nomme
+// les blocs du plan lui-même (moteur) ; tests/datums.test.ts compare la carte à la rekenhulp de la page.
+const rondNaam = (b: (typeof p5.blokken)[number], l: Lang) => K.defOf(b.feestdagen[0] as Parameters<typeof K.defOf>[0]).kort[l];
+export const kaart = (l: Lang) => { const r = p5.blokken.map((b) => rondNaam(b, l)); const lijst = r.length > 1 ? `${r.slice(0, -1).join(', ')} ${l === 'nl' ? 'en' : 'and'} ${r[r.length - 1]}` : r.join(''); return l === 'nl' ? `Met ${N(p5.verlof, 'nl')} verlofdagen ${N(p5.vrij, 'nl')} dagen vrij: rond ${lijst}` : `${N(p5.verlof, 'en')} leave days give ${N(p5.vrij, 'en')} days off: around ${lijst}`; };
 const rij = (l: Lang, p: typeof p10) => p.blokken.map((b) => [SPAN(b.verlofVan, b.verlofTot, l), b.verlof, SPAN(b.vrijVan, b.vrijTot, l), b.vrij]);
 
 export default defineGuide({
@@ -19,7 +24,7 @@ export default defineGuide({
   related: ['werkdagen-2027', 'hemelvaart-2027', 'koningsdag-2027', 'brugdagen-2028'],
   sources: ['rijks-feestdagen', 'rijks-koningsdag', 'rijks-hemelvaart', 'rijks-sv-2026'],
   nl: {
-    slug: 'brugdagen-2027', nav: 'Brugdagen 2027', card: `Brugdagen ${bd.map((b) => DS(b.verlofVan, 'nl')).join(' en ')}; 5 verlofdagen = ${N(p5.vrij, 'nl')} dagen vrij`,
+    slug: 'brugdagen-2027', nav: 'Brugdagen 2027', card: kaart('nl'),
     title: 'Brugdagen 2027: verlofplanner met de beste vrije dagen',
     description: `Brugdagen 2027 in Nederland: ${WD(bd[0].verlofVan, 'nl')} ${D(bd[0].verlofVan, 'nl')} en ${WD(bd[1].verlofVan, 'nl')} ${D(bd[1].verlofVan, 'nl')}. De planner legt uw verlofdagen zo dat u de meeste dagen achter elkaar vrij bent.`,
     h1: 'Brugdagen 2027: meer vrij met minder verlof',
@@ -33,14 +38,14 @@ export default defineGuide({
     body: (h) => `<h2>Brugdagen 2027 in een verlofplan van tien dagen</h2>
 ${h.table(['Verlof nemen', 'Verlofdagen', 'Vrij op een rij', 'Vrije dagen'], rij('nl', p10), `Tien verlofdagen in ${Y}: ${N(p10.vrij, 'nl')} dagen vrij`, ['l', 'r', 'l', 'r'])}
 <p>De planner vergelijkt alle combinaties en kiest de verdeling met de meeste vrije dagen, niet alleen de bruggen met het beste rendement. Daarom staan er ook blokken van vier verlofdagen in: na Pasen, van ${h.day(paas.verlofVan)} tot ${h.day(paas.verlofTot)}, geeft dat ${N(paas.vrij, 'nl')} dagen vrij; na Pinksteren, van ${h.day(pink.verlofVan)} tot ${h.day(pink.verlofTot)}, ook ${N(pink.vrij, 'nl')}.</p>
-<h2>Mei 2027: drie feestdagen, twee bruggen</h2>
+<h2>Eind april en begin mei 2027: drie feestdagen, twee bruggen</h2>
 <p>Koningsdag op ${h.wd(kd)}, Bevrijdingsdag op ${h.wd(bv)} en Hemelvaart op ${h.wd(hv)} liggen binnen tien dagen. Voor wie 5 mei moet werken, zijn er twee losse bruggen. Wie 5 mei vrij heeft, vult met ${N(metBd.verlof, 'nl')} verlofdagen veel meer: ${N(metBd.vrij, 'nl')} vrije dagen, namelijk ${metBd.blokken.map((b) => `${SPAN(b.vrijVan, b.vrijTot, 'nl')} (${verlofNaarVrij(b.verlof, b.vrij, 'nl')})`).join(' en ')}. Of 5 mei vrij is, ${h.src('rijks-bevrijdingsdag', 'hangt volgens de Rijksoverheid af van uw cao')}.</p>
 ${h.mini('vrij', { t: 'Is 5 mei 2027 vrij in uw situatie?', d: { pf: 0, fd: 5 }, e: 'Voorbeeld voor een werknemer bij een bedrijf' })}
 <h2>Rekening houden met de meivakantie</h2>
 <p>De meivakantie van ${h.per(mei)} geldt in Noord, Midden en Zuid tegelijk. Ouders die de week ervoor of erna vrij nemen, zitten dus nooit verkeerd per regio. De brug van ${h.day(bd[0].verlofVan)} valt al in de schoolvakantie; die van ${h.day(bd[1].verlofVan)} niet, al geven veel scholen die vrijdag vrij. Meer per regio op ${h.a('schoolvakanties-2026-2027', 'schoolvakanties 2026-2027')}.</p>`,
   },
   en: {
-    slug: 'bridge-days-2027', nav: 'Bridge days 2027', card: `Bridge days ${bd.map((b) => DS(b.verlofVan, 'en')).join(' and ')}; 5 leave days = ${N(p5.vrij, 'en')} days off`,
+    slug: 'bridge-days-2027', nav: 'Bridge days 2027', card: kaart('en'),
     title: "Bridge days 2027 Netherlands: leave planner, long weekends",
     description: "Bridge days 2027 in the Netherlands: Monday 26 April and Friday 7 May. The planner places your leave days to give you the longest runs of days off in a row.",
     h1: 'Bridge days 2027: more time off for less leave',
@@ -54,7 +59,7 @@ ${h.mini('vrij', { t: 'Is 5 mei 2027 vrij in uw situatie?', d: { pf: 0, fd: 5 },
     body: (h) => `<h2>Bridge days 2027 in a ten-day leave plan</h2>
 ${h.table(['Take leave', 'Leave days', 'Off in a row', 'Days off'], rij('en', p10), `Ten leave days in ${Y}: ${N(p10.vrij, 'en')} days off`, ['l', 'r', 'l', 'r'])}
 <p>The planner compares every combination and picks the split with the most days off, not just the bridges with the best return. That is why four-day blocks appear too: after Easter, ${h.day(paas.verlofVan)} to ${h.day(paas.verlofTot)}, gives ${N(paas.vrij, 'en')} days off; after Whitsun, ${h.day(pink.verlofVan)} to ${h.day(pink.verlofTot)}, also ${N(pink.vrij, 'en')}.</p>
-<h2>May 2027: three holidays, two bridges</h2>
+<h2>Late April and early May 2027: three holidays, two bridges</h2>
 <p>King's Day on a ${h.wd(kd)}, Liberation Day on a ${h.wd(bv)} and Ascension on a ${h.wd(hv)} fall within ten days. If you work on 5 May, there are two separate bridges. If 5 May is off, ${N(metBd.verlof, 'en')} leave days fill far more: ${N(metBd.vrij, 'en')} days off, namely ${metBd.blokken.map((b) => `${SPAN(b.vrijVan, b.vrijTot, 'en')} (${verlofNaarVrij(b.verlof, b.vrij, 'en')})`).join(' and ')}. Whether 5 May is off ${h.src('rijks-bevrijdingsdag', 'depends on your agreement, says the government')}.</p>
 ${h.mini('vrij', { t: 'Is 5 May 2027 a day off for you?', d: { pf: 0, fd: 5 }, e: 'Example for an employee at a company' })}
 <h2>Planning around the May school break</h2>

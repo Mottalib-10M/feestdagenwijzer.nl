@@ -33,7 +33,7 @@ export default defineGuide({
     ],
     body: (h) => `<h2>Feestdagen 2029 met weekdag</h2>
 <details class="fold not-prose"><summary><span class="fold-h">Alle elf feestdagen van 2029 als tabel</span></summary>${h.table(['Feestdag', 'Datum', 'Weekdag'], h.officieel(Y).map((f) => [f.name.nl, h.day(f.date), h.wd(f.date)]), `Officiële feestdagen ${Y}, berekend volgens de vaste regels`, ['l', 'l', 'l'])}</details>
-<p>De ${N(bd.length, 'nl')} brugdagen van ${Y}, ${RANG.nl}: ${bdLijst('nl')}.</p>
+<p>De ${N(bd.length, 'nl')} brugdagen van ${Y}, eerst die met ${RANG.nl}: ${bdLijst('nl')}.</p>
 <p>Dat Koningsdag op vrijdag valt en 5 mei op zaterdag, maakt het voorjaar van ${Y} rustig: geen brug rond Koningsdag, en geen gedoe over wel of niet vrij op Bevrijdingsdag. De brug na Hemelvaart, vrijdag ${h.day(K.plusDagen(hv, 1))}, blijft.</p>
 <h2>Het einde van 2029: twee bruggen achter elkaar</h2>
 <p>Met Kerst op dinsdag en woensdag zijn maandag 24 en maandag 31 december allebei brugdagen. Neemt u ook donderdag 27 en vrijdag 28 december vrij, dan bent u met vier verlofdagen van zaterdag 22 december tot en met Nieuwjaarsdag 2030 vrij: elf dagen op een rij.</p>
@@ -55,7 +55,7 @@ ${h.mini('brug', { t: 'Hoeveel vrij haalt u uit 2029?', d: { verlof: 3, jaar: 20
     ],
     body: (h) => `<h2>Public holidays 2029 with weekdays</h2>
 <details class="fold not-prose"><summary><span class="fold-h">All eleven holidays of 2029 as a table</span></summary>${h.table(['Holiday', 'Date', 'Weekday'], h.officieel(Y).map((f) => [f.name.en, h.day(f.date), h.wd(f.date)]), `Official holidays ${Y}, computed from the fixed rules`, ['l', 'l', 'l'])}</details>
-<p>The ${N(bd.length, 'en')} bridge days of ${Y}, ${RANG.en}: ${bdLijst('en')}.</p>
+<p>The ${N(bd.length, 'en')} bridge days of ${Y}, first those with ${RANG.en}: ${bdLijst('en')}.</p>
 <p>With King's Day on a Friday and 5 May on a Saturday, spring ${Y} is calm: no bridge around King's Day and no question about Liberation Day. The bridge after Ascension, Friday ${h.day(K.plusDagen(hv, 1))}, remains.</p>
 <h2>The end of 2029: two bridges in a row</h2>
 <p>With Christmas on Tuesday and Wednesday, Monday 24 and Monday 31 December are both bridge days. Take Thursday 27 and Friday 28 December too, and four leave days give you Saturday 22 December through New Year's Day 2030: eleven days in a row.</p>

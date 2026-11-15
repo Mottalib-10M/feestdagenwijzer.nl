@@ -81,6 +81,7 @@ export default function MiniSim({ kind, lang = 'en', href, title, idPrefix = 'm'
           <MentionExemple lang={lang} touched={touched} modifiables={visibles.length} suppose={exemple ?? exempleSuppose(spec.exemple, v)} />
           <p className="text-sm font-medium text-navy-600">{out.head[0]}</p>
           <p className="tabular-nums mt-1 text-3xl font-bold text-navy-900">{out.head[1]}</p>
+          {out.sub && <p className="mt-1 text-sm text-navy-700">{out.sub}</p>}
           {out.alert && <p data-alerte role="note" className="mt-2 border-l-4 border-amber-500 pl-2 text-sm font-semibold text-navy-900">{out.alert}</p>}
           <table className="mt-3 w-full text-sm"><tbody className="divide-y divide-navy-200">
             {out.rows.map(([l, x]) => (valeurEnMots(x)

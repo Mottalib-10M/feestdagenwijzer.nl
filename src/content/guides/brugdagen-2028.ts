@@ -35,7 +35,7 @@ export default defineGuide({
     ],
     body: (h) => `<h2>Brugdagen 2028 in een plan van negen verlofdagen</h2>
 ${h.table(['Verlof nemen', 'Verlofdagen', 'Vrij op een rij', 'Vrije dagen'], rij('nl', p9), `Negen verlofdagen in ${Y}: ${N(p9.vrij, 'nl')} dagen vrij`, ['l', 'r', 'l', 'r'])}
-<p>Het plan staat op volgorde van de kalender. In de lijst van de rekenhulp, ${RANG.nl}, staan ${topNl} bovenaan. De kerstbrug geeft de langste vrije periode, omdat drie verlofdagen er twee weekenden, twee Kerstdagen en Nieuwjaarsdag aan elkaar rijgen. Pasen valt in ${Y} laat, op ${h.day(F('eerste-paasdag', Y))}, en de meivakantie loopt van ${h.per(s27.mei)}.</p>
+<p>Het plan staat op volgorde van de kalender. De lijst van de rekenhulp zet de blokken met ${RANG.nl} bovenaan: dat zijn ${topNl}. De kerstbrug geeft de langste vrije periode, omdat drie verlofdagen er twee weekenden, twee Kerstdagen en Nieuwjaarsdag aan elkaar rijgen. Pasen valt in ${Y} laat, op ${h.day(F('eerste-paasdag', Y))}, en de meivakantie loopt van ${h.per(s27.mei)}.</p>
 <h2>Koningsdag op ${WD(kd, 'nl')}, 5 mei op ${WD(bv, 'nl')}</h2>
 <p>Koningsdag valt op ${h.wday(kd)}. Met één verlofdag op ${h.wday(kb.verlofVan)} bent u ${N(kb.vrij, 'nl')} dagen achter elkaar vrij, ${SPAN(kb.vrijVan, kb.vrijTot, 'nl')}. ${vijfMei(Y, 'nl')} Of 5 mei vrij is, ${h.src('rijks-bevrijdingsdag', 'hangt af van uw cao')}.</p>
 ${h.mini('vrij', { t: `Bent u vrij op 5 mei ${Y}?`, d: { pf: 0, fd: 5, jaar: Y }, e: `Voorbeeld voor een werknemer bij een bedrijf, ${Y}` })}
@@ -55,7 +55,7 @@ ${h.mini('vrij', { t: `Bent u vrij op 5 mei ${Y}?`, d: { pf: 0, fd: 5, jaar: Y }
     ],
     body: (h) => `<h2>Bridge days 2028 in a nine-day leave plan</h2>
 ${h.table(['Take leave', 'Leave days', 'Off in a row', 'Days off'], rij('en', p9), `Nine leave days in ${Y}: ${N(p9.vrij, 'en')} days off`, ['l', 'r', 'l', 'r'])}
-<p>The plan is in calendar order. In the tool's list, ${RANG.en}, ${topEn} come first. The Christmas bridge gives the longest stretch off, because three leave days link two weekends, both Christmas days and New Year's Day. Easter is late in ${Y}, on ${h.day(F('eerste-paasdag', Y))}, and the May break runs ${h.per(s27.mei)}.</p>
+<p>The plan is in calendar order. The tool's list puts the blocks with ${RANG.en} first: ${topEn}. The Christmas bridge gives the longest stretch off, because three leave days link two weekends, both Christmas days and New Year's Day. Easter is late in ${Y}, on ${h.day(F('eerste-paasdag', Y))}, and the May break runs ${h.per(s27.mei)}.</p>
 <h2>King's Day on ${WD(kd, 'en')}, 5 May on ${WD(bv, 'en')}</h2>
 <p>King's Day falls on ${h.wday(kd)}. One leave day on ${h.wday(kb.verlofVan)} gives ${N(kb.vrij, 'en')} days off in a row, ${SPAN(kb.vrijVan, kb.vrijTot, 'en')}. ${vijfMei(Y, 'en')} Whether 5 May is off ${h.src('rijks-bevrijdingsdag', 'depends on your agreement')}.</p>
 ${h.mini('vrij', { t: `Are you off on 5 May ${Y}?`, d: { pf: 0, fd: 5, jaar: Y }, e: `Example for an employee at a company, ${Y}` })}

@@ -7,6 +7,8 @@ export interface MiniInput { id: string; label: string; def: number; unit?: stri
    *  comme une panne). Un champ caché garde sa valeur et ne compte pas parmi les champs modifiables. */
   showIf?: (v: Record<string, number>) => boolean }
 export interface MiniOut { head: [string, string]; rows: Array<[string, string]>; note?: string;
+  /** Petite ligne juste sous le gros chiffre (feestdagenwijzer.nl, 2026-11-14 : « (staat in uw cao of arbeidscontract) »). */
+  sub?: string;
   /** Ligne d'alerte en gras juste sous le gros chiffre : ce que le chiffre laisse de côté, ou ce qui le rend
    *  inapplicable pour cette réponse (financecertcost.com, 2026-11-09 : « la préparation, la plus grosse ligne, est cachée »). */
   alert?: string;

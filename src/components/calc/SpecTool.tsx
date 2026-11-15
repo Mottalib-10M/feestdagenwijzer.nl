@@ -57,6 +57,14 @@ export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }
     setV(next); setTouched(tt);
   }, []);
   const rv = useMemo(() => resolve(spec.inputs, v), [v, spec]);
+  // Un lien « … ↓ » vers une liste repliée l'ouvre avant de défiler (le clic passe avant la navigation).
+  useEffect(() => {
+    const open = (id: string) => { const el = id && document.getElementById(id); if (el instanceof HTMLDetailsElement) el.open = true; };
+    const onClick = (e: MouseEvent) => { const a = (e.target as Element | null)?.closest?.('a[href^="#"]'); if (a) open(a.getAttribute('href')!.slice(1)); };
+    open(decodeURIComponent(location.hash.slice(1)));
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, []);
   useEffect(() => { if (Object.keys(touched).length) updateURL(rv as Record<string, string | number>); }, [rv, touched]);
   const out = useMemo(() => spec.run(rv), [rv, spec]);
   const set = (id: string) => (x: number | string) => { setV((o) => ({ ...o, [id]: x })); setTouched((o) => (o[id] ? o : { ...o, [id]: true })); };
@@ -97,7 +105,7 @@ export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }
       {/* Testeurs naïfs 2026-11-14 : ces tableaux (5 ou 6 colonnes) étaient coupés à droite sur téléphone, la colonne
           « Vrij? » cachée. Comme les tableaux du contenu (lib/tableaux.ts), ils deviennent des fiches sous 768 px. */}
       {[out.table, ...(out.tables ?? [])].filter((x) => !!x).map((tb, ti) => { const fiche = ficheTitre(tb!.headers, tb!.rows); const tabel = (
-        <div key={ti} id={tb!.id ? `${idPrefix}-${tb!.id}` : undefined} className="mt-4 overflow-x-auto scroll-mt-20">
+        <div key={ti} id={tb!.id && !tb!.fold ? `${idPrefix}-${tb!.id}` : undefined} className="mt-4 overflow-x-auto scroll-mt-20">
           <table className={`w-full text-sm${tb!.headers.length >= 3 ? ' empile' : ''}`} data-titre={fiche.titre ? '2' : undefined}>
             {tb!.caption && <caption className="mb-2 text-left text-sm text-navy-700">{tb!.caption}</caption>}
             <thead><tr>{tb!.headers.map((h, i) => <th key={h + i} scope="col" className={`border-b border-navy-300 px-2 py-1.5 font-semibold text-navy-900 ${tb!.align?.[i] === 'r' ? 'text-right' : 'text-left'}`}>{h}</th>)}</tr></thead>
@@ -105,7 +113,7 @@ export default function SpecTool({ kind, lang, arg, methodHref, idPrefix = 't' }
           </table>
         </div>
       );
-      return tb!.fold ? <details key={ti} className="mt-4 rounded-lg border border-navy-200 px-3 py-2"><summary className="cursor-pointer text-sm font-medium text-accent-700">{tb!.fold}</summary>{tabel}</details> : tabel; })}
+      return tb!.fold ? <details key={ti} id={tb!.id ? `${idPrefix}-${tb!.id}` : undefined} className="mt-4 scroll-mt-20 rounded-lg border border-navy-200 px-3 py-2"><summary className="cursor-pointer text-sm font-medium text-accent-700">{tb!.fold}</summary>{tabel}</details> : tabel; })}
     </div>
   );
 }

@@ -51,7 +51,8 @@ export const PROFIELEN: Profiel[] = ['bedrijf', 'ambtenaar', 'school'];
 export const PROFIEL_NAAM: Record<Profiel, Tri> = {
   bedrijf: N('Werknemer bij een bedrijf', 'Employee at a company'),
   ambtenaar: N('Ambtenaar', 'Civil servant'),
-  school: N('Scholier, student of ouder', 'Pupil, student or parent'),
+  // Tour 4 (testeurs 1 et 2) : « of ouder » laissait croire qu'un parent salarié est libre parce que l'école est fermée.
+  school: N('Scholier of student', 'Pupil or student'),
 };
 /**
  * Wat de Rijksoverheid per feestdag zegt (vraag-en-antwoordpagina's, gelezen op de datum in params-2026.json):
@@ -81,7 +82,9 @@ export const STATUS_TEKST: Record<Status, Tri> = {
   ja: N('Vrij', 'Day off'),
   meestal: N('Meestal vrij', 'Usually off'),
   werken: N('Meestal werken', 'Usually a working day'),
-  'vraag-na': N('Hangt van uw cao af', 'Depends on your agreement'),
+  // Tour 4 (testeur 3, validé par l'éditeur) : « Hangt van uw cao af » en gros employait « cao » sans explication, même
+  // pour un ambtenaar. La réponse dit qui décide en mots simples ; le document où cela figure suit en petit (STATUS_KLEIN).
+  'vraag-na': N('Hangt af van uw werkgever', 'Depends on your employer'),
   zondag: N('Altijd op zondag: geen extra vrije dag', 'Always a Sunday: no extra day off'),
   vakantie: N('Kerstvakantie', 'Christmas break'),
   // Testeurs naïfs 2026-11-14 : « Geen toelichting van de Rijksoverheid » se lisait « on ne sait pas si l'on est
@@ -94,6 +97,10 @@ export const STATUS_TEKST: Record<Status, Tri> = {
   // la réserve « uw cao beslist » reste dans le cadre « Gerekend als vrij » sous chaque résultat.
   geen: N('Meestal vrij', 'Usually off'),
 };
+/** Petite ligne sous un libellé (en gros) ou entre parenthèses derrière lui (lignes et tableaux). */
+export const STATUS_KLEIN: Partial<Record<Status, Tri>> = { 'vraag-na': N('(staat in uw cao of arbeidscontract)', '(set in your collective agreement or employment contract)') };
+/** Libellé avec sa petite ligne, pour les lignes et les tableaux où il n'y a pas de place pour deux tailles. */
+export const statusVol = (st: Status, l: Lang): string => (STATUS_KLEIN[st] ? `${STATUS_TEKST[st][l]} ${STATUS_KLEIN[st]![l]}` : STATUS_TEKST[st][l]);
 /**
  * Tekst voor de kolom « Vrij? » bij een datum. Een feestdag op zaterdag of zondag levert geen vrije werkdag op:
  * « Eerste Kerstdag, zaterdag: Als vrij gerekend » las als onzin (testeurs naïfs 2026-11-14, tour 2).
@@ -101,7 +108,7 @@ export const STATUS_TEKST: Record<Status, Tri> = {
 export function vrijOpDatum(id: FeestId, date: string, pf: Profiel, l: Lang): string {
   const st = VRIJ[id][pf], wd = weekday(fromIso(date));
   if ((wd === 0 || wd === 6) && st !== 'zondag' && st !== 'vakantie') return l === 'nl' ? `Valt op ${wd === 6 ? 'zaterdag' : 'zondag'}: geen extra vrije dag` : `Falls on a ${wd === 6 ? 'Saturday' : 'Sunday'}: no extra day off`;
-  return STATUS_TEKST[st][l];
+  return statusVol(st, l);
 }
 
 /* ------------------------------------------------------------------ Opties voor de rekenaars */

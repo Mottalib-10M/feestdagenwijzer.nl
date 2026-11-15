@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import SelectField from '../ui/SelectField';
 import { ResultCard, Rows, ShareRow } from '../calc/parts';
 import { readParams, updateURL } from '../../lib/url-state';
-import { volgende, VRIJ, STATUS_TEKST } from '../../lib/engine/feestdagen';
+import { volgende, VRIJ, statusVol } from '../../lib/engine/feestdagen';
 import { volgendeVakantie, REGIOS, REGIO_NAAM, VAK_NAAM, type Regio } from '../../lib/engine/school';
 import { fromIso, nederlandInstant, isWeekend } from '../../lib/engine/dagen';
 import { dShortY, dLong, dWeek, T as TT } from '../../lib/tool-specs';
@@ -41,7 +41,7 @@ export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a', 
   const d = Math.floor(left / 864e5), h = Math.floor((left % 864e5) / 36e5), m = Math.floor((left % 36e5) / 6e4);
   const nf = new Intl.NumberFormat(lang === 'nl' ? 'nl-NL' : 'en-GB');
   const vandaag = next.date === today;
-  const status = STATUS_TEKST[VRIJ[next.id].bedrijf][lang];
+  const status = statusVol(VRIJ[next.id].bedrijf, lang);
   const v0 = vak[0];
   return (
     <div className="rounded-xl border border-navy-200 bg-white p-4 sm:p-5">
@@ -69,7 +69,7 @@ export default function Aftellen({ lang, regio: r0, methodHref, idPrefix = 'a', 
             [T('Vrij voor werknemers?', 'Day off for employees?'), isWeekend(fromIso(next.date)) ? T('Valt in het weekend', 'Falls on a weekend') : status],
             ...[
               ...lijst.slice(1, 4).map((f) => [f.date, T(`Daarna: ${f.name.nl}`, `Then: ${f.name.en}`), dShortY(f.date, lang)]),
-              ...(v0 ? [[v0.bezig ? today : v0.p.van, `${VAK_NAAM[v0.vak][lang]} (${REGIO_NAAM[regio][lang]})`, v0.bezig ? T('nu bezig', 'now on') : dShortY(v0.p.van, lang)]] : []),
+              ...(v0 ? [[v0.bezig ? today : v0.p.van, `${VAK_NAAM[v0.vak][lang]} (${REGIO_NAAM[regio][lang]}) ${v0.bezig ? '' : T('begint', 'starts')}`.trim(), v0.bezig ? T('nu bezig', 'now on') : dShortY(v0.p.van, lang)]] : []),
             ].sort((a, b) => a[0].localeCompare(b[0])).map(([, k, w]) => [k, w] as [string, string]),
           ]} />
           <ShareRow methodHref={methodHref} labels={ui} />

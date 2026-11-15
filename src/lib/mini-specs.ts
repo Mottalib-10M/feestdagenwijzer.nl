@@ -12,7 +12,7 @@ import type { Lang } from './format';
 import { formatNumber, formatDecimal } from './format';
 import { optimaliseer, brugdagen, werkdagen } from './engine/bruggen';
 import { kalender, SCHOOLJAREN, REGIOS, REGIO_NAAM, VAKS, VAK_NAAM, dagen, sj, type Regio, type Vak } from './engine/school';
-import { FEESTDAGEN, PROFIELEN, PROFIEL_NAAM, VRIJ, STATUS_TEKST, datum, type Profiel } from './engine/feestdagen';
+import { FEESTDAGEN, PROFIELEN, PROFIEL_NAAM, VRIJ, STATUS_TEKST, STATUS_KLEIN, statusVol, datum, type Profiel } from './engine/feestdagen';
 import { verleng } from './engine/termijnen';
 import { JAREN, MAANDEN, span, dWeek, dShort, periode, T, dagenTxt, verlofNaarVrij } from './tool-specs';
 
@@ -84,7 +84,7 @@ export function getSpec(kind: string, lang = 'nl'): MiniSpec {
       ],
       run: (v) => {
         const pf = PROFIELEN[v.pf] as Profiel, f = FEESTDAGEN[v.fd], d = datum(f.id, v.jaar), st = VRIJ[f.id][pf];
-        return { head: [`${f.name[l]} ${v.jaar}`, STATUS_TEKST[st][l]], rows: [[T(l, 'Datum', 'Date'), dWeek(d, l)], ...PROFIELEN.map((p) => [PROFIEL_NAAM[p][l], STATUS_TEKST[VRIJ[f.id][p]][l]] as [string, string])], note: T(l, 'Volgens de vraag-en-antwoordpagina’s van de Rijksoverheid; uw cao beslist.', 'According to the government’s question-and-answer pages; your agreement decides.') };
+        return { head: [`${f.name[l]} ${v.jaar}`, STATUS_TEKST[st][l]], sub: STATUS_KLEIN[st]?.[l], rows: [[T(l, 'Datum', 'Date'), dWeek(d, l)], ...PROFIELEN.map((p) => [PROFIEL_NAAM[p][l], statusVol(VRIJ[f.id][p], l)] as [string, string])], note: T(l, 'Volgens de vraag-en-antwoordpagina’s van de Rijksoverheid; uw cao beslist.', 'According to the government’s question-and-answer pages; your agreement decides.') };
       },
     };
     case 'termijn': return {
